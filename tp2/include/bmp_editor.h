@@ -9,6 +9,9 @@
 #define INPUT_SIZE 255
 #define EXIT_MSG "exit\n"
 
+#define CONTRAST    ( (double) 1.3 )
+#define BRIGHTNESS  ( (uint8_t) 30 )
+
 #define ORIGINAL_IMAGE_PATH "./resources/original_image.bmp"
 #define ORIGINAL_IMAGE_NAME "original_image.bmp"
 #define EDITED_IMAGE_PATH "./resources/edited_image.bmp"
@@ -24,14 +27,17 @@ enum areas {
   IN_AREA = 1
 };
 
-enum succes {
+enum return_values {
   SUCCES = 1,
-  FAIL = 0
+  FAILURE = 0
 } ;
 
-enum succes radio_input();
 enum areas get_pixel_area();
-enum succes edit_image();
-enum succes open_image();
+enum return_values radio_input();
+enum return_values edit_image();
+enum return_values open_image();
 void rutina_salida();
 void view_images();
+
+void increase_contrast(struct _sbmp_raw_data*);
+void increase_brightness(struct _sbmp_raw_data*);
