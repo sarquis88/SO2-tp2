@@ -93,6 +93,7 @@ enum sbmp_codes sbmp_load_bmp (const char *filename, sbmp_image *image)
   if (image->data == NULL)
     {
       fprintf (stderr, "Error: %s\n", strerror (errno));
+      fclose (fd);
       return SBMP_ERROR_FILE;
     }
 
