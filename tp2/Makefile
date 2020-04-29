@@ -1,4 +1,4 @@
-FLAGS= -std=gnu11 -Wall -Werror -pedantic -Wextra -Wconversion -g -lm
+FLAGS= -std=gnu11 -Wall -Werror -pedantic -Wextra -Wconversion -g -lm -fopenmp
 
 make:
 	cppcheck ./
