@@ -13,7 +13,7 @@
 #define BRIGHTNESS  ( (uint8_t) 30 )
 
 // tiene que ser impar !!!
-#define KERNEL_SIZE    ( (int8_t) 41 )
+#define KERNEL_SIZE    ( (int8_t) 19 )
 
 #define ORIGINAL_IMAGE_PATH "./resources/original_image.bmp"
 #define EDITED_IMAGE_PATH "./resources/edited_image.bmp"
@@ -42,3 +42,4 @@ void rutina_salida();
 void view_images();
 void blure_pixel(struct position *);
 void increase_pixel_contrast_brightness(struct position *);
+void set_position(struct position *, int32_t, int32_t);

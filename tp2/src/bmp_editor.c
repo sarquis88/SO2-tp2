@@ -145,8 +145,8 @@ enum return_values edit_image()
      }
 
     struct position *center = malloc(sizeof(struct position));
-    center->y = bmp_edited->info.image_height / 2;
-    center->x = bmp_edited->info.image_width / 2;
+    set_position( center, bmp_edited->info.image_width / 2,
+                  bmp_edited->info.image_height / 2);
 
     #pragma omp parallel for
       for(int32_t i = 0; i < bmp_edited->info.image_height; i++)
@@ -154,8 +154,7 @@ enum return_values edit_image()
           for(int32_t j = 0; j < bmp_edited->info.image_width; j++)
             {
               struct position * position = malloc(sizeof(struct position));
-              position->x = j;
-              position->y = i;
+              set_position(position, j, i);
               if( get_position_area(position, center) == EX_AREA )
                 blure_pixel(position);
               else
@@ -166,6 +165,7 @@ enum return_values edit_image()
 
     sbmp_save_bmp(EDITED_IMAGE_PATH, bmp_edited);
     free(bmp_edited);
+    free(center);
     return SUCCES;
   }
 
@@ -227,12 +227,24 @@ void blure_pixel(struct position * position)
   {
   int32_t off = KERNEL_SIZE / 2;
 
-    // chequeo de bordes: si el pixel está en el borde, no se hace nada
+    // si el pixel está en el borde, se hace igual a la imagen original
+    // ( sin blure ni nada )
+    int8_t borde = 0;
     if( position->x < off || position->y < off)
-      return;
-    if( position->x + off >= bmp_edited->info.image_width
-        ||  position->y + off >= bmp_edited->info.image_height)
-      return;
+      borde = 1;
+    else if(      position->x + off >= bmp_edited->info.image_width
+              ||  position->y + off >= bmp_edited->info.image_height)
+      borde = 1;
+    if(borde)
+      {
+        bmp_edited->data[position->y][position->x].blue =
+          bmp_original->data[position->y][position->x].blue;
+        bmp_edited->data[position->y][position->x].green =
+          bmp_original->data[position->y][position->x].green;
+        bmp_edited->data[position->y][position->x].red =
+          bmp_original->data[position->y][position->x].red;
+        return;
+      }
 
     uint32_t acum_blue = 0;
     uint32_t acum_green = 0;
@@ -280,4 +292,16 @@ void blure_pixel(struct position * position)
       if(aux > 255)
         aux = 255;
       bmp_edited->data[position->y][position->x].red = (uint8_t) aux;
+  }
+
+/*
+ * Setea la posicion de la estructura ingresada
+ * @param position struct de posicion inicializada
+ * @param x coordenada x
+ * @param y coordenada y
+ */
+void set_position(struct position * position, int32_t x, int32_t y)
+  {
+    position->x = x;
+    position->y = y;
   }
