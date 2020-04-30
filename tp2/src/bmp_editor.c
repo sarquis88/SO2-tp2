@@ -5,12 +5,31 @@ char input[INPUT_SIZE];
 struct _sbmp_image *bmp_original;
 struct _sbmp_image *bmp_edited;
 uint8_t kernel[KERNEL_SIZE][KERNEL_SIZE];
+double start, seconds;
 
 /**
  *  Funcion principal
  */
-int32_t main()
+int32_t main( int32_t argc, char *argv[] )
   {
+
+    // chequeo de argumentos
+  	if ( argc < 2 ) {
+  		printf("Uso: %s <multithread>\n", argv[0]);
+      printf("0 -> multithread desactivado\n1 -> multithread activado\n");
+  		exit(1);
+  	}
+
+    if( strtol(argv[1], NULL, 10) == 0 )
+      omp_set_num_threads( 1 );
+    else
+      omp_set_num_threads( omp_get_max_threads() );
+
+    // activar handler para SIGINT
+  	struct sigaction sa;
+    sa.sa_handler = rutina_salida;
+  	sigaction(SIGINT, &sa,  NULL);
+
     printf("\n");
     printf("<----------------------------------------------------------->\n");
     printf("<-------------Editor de imágenes en formato BMP------------->\n");
@@ -19,9 +38,9 @@ int32_t main()
     fflush(stdout);
 
     // seteo de kernel
-    for(int32_t i = 0; i < KERNEL_SIZE; i++)
+    for(int8_t i = 0; i < KERNEL_SIZE; i++)
       {
-        for(int32_t j = 0; j < KERNEL_SIZE; j++)
+        for(int8_t j = 0; j < KERNEL_SIZE; j++)
           {
             kernel[i][j] = 1;
           }
@@ -38,7 +57,7 @@ int32_t main()
         printf("\nIngrese el radio de la imágen"
         " (en pixeles) o 'exit' para salir\n");
         if( radio_input() == FAILURE)
-          rutina_salida();
+          rutina_salida(SUCCES);
         else
           printf("Radio: %ld pixeles\n", radio);
 
@@ -47,10 +66,13 @@ int32_t main()
         printf("Tamaño del kernel: %dx%d\n", KERNEL_SIZE, KERNEL_SIZE);
 
         printf("Editando imágen...\n");
+        start_time();
         if( edit_image() == FAILURE)
           exit(EXIT_FAILURE);
         printf("Imágen editada\n");
         printf("Edición guardada en: %s\n", EDITED_IMAGE_PATH);
+        stop_time();
+        printf("Tiempo: %0.2f segundos\n", seconds);
       }
 
     return SUCCES;
@@ -78,12 +100,12 @@ enum return_values radio_input()
 
         radio = strtol( input, NULL, 10);
 
-        int32_t max_radio_value;
+        int16_t max_radio_value;
         if( bmp_original->info.image_width < bmp_original->info.image_height )
-          max_radio_value = bmp_original->info.image_width;
+          max_radio_value = (int16_t) bmp_original->info.image_width;
         else
-          max_radio_value = bmp_original->info.image_height;
-        max_radio_value = max_radio_value / 2 - 1;
+          max_radio_value = (int16_t) bmp_original->info.image_height;
+        max_radio_value = ( (int16_t) (max_radio_value / 2 - 1) );
 
         if(radio > 0 && radio <= max_radio_value)
           return SUCCES;
@@ -95,9 +117,10 @@ enum return_values radio_input()
 /**
  *  Rutina de ejecución cuando se sale del programa sin errores
  */
-void rutina_salida()
+void rutina_salida(int32_t sig)
   {
-    printf("\nSaliendo...\n");
+    if(sig)
+      printf("\nSaliendo...\n");
     exit(SUCCES);
   }
 
@@ -145,13 +168,13 @@ enum return_values edit_image()
      }
 
     struct position *center = malloc(sizeof(struct position));
-    set_position( center, bmp_edited->info.image_width / 2,
-                  bmp_edited->info.image_height / 2);
+    set_position( center, ( (int16_t) (bmp_edited->info.image_width / 2) ),
+                          ( (int16_t) (bmp_edited->info.image_height / 2) ) );
 
     #pragma omp parallel for
-      for(int32_t i = 0; i < bmp_edited->info.image_height; i++)
+      for(int16_t i = 0; i < bmp_edited->info.image_height; i++)
         {
-          for(int32_t j = 0; j < bmp_edited->info.image_width; j++)
+          for(int16_t j = 0; j < bmp_edited->info.image_width; j++)
             {
               struct position * position = malloc(sizeof(struct position));
               set_position(position, j, i);
@@ -198,24 +221,24 @@ enum areas get_position_area(struct position * position,
  */
 void increase_pixel_contrast_brightness(struct position * position)
   {
-    int32_t aux;
+    int16_t aux;
 
-    aux = ( (int32_t) (bmp_original->data[position->y][position->x].blue
+    aux = ( (int16_t) (bmp_original->data[position->y][position->x].blue
             * CONTRAST + BRIGHTNESS) );
     if(aux >= 255)
-      aux = 255;
+        aux = 255;
     bmp_edited->data[position->y][position->x].blue = (uint8_t) aux;
 
-    aux = ( (int32_t) (bmp_original->data[position->y][position->x].green
+    aux = ( (int16_t) (bmp_original->data[position->y][position->x].green
             * CONTRAST + BRIGHTNESS) );
     if(aux >= 255)
-      aux = 255;
+        aux = 255;
     bmp_edited->data[position->y][position->x].green = (uint8_t) aux;
 
-    aux = ( (int32_t) (bmp_original->data[position->y][position->x].red
+    aux = ( (int16_t) (bmp_original->data[position->y][position->x].red
             * CONTRAST + BRIGHTNESS) );
     if(aux >= 255)
-      aux = 255;
+        aux = 255;
     bmp_edited->data[position->y][position->x].red = (uint8_t) aux;
   }
 
@@ -225,7 +248,7 @@ void increase_pixel_contrast_brightness(struct position * position)
  */
 void blure_pixel(struct position * position)
   {
-  int32_t off = KERNEL_SIZE / 2;
+    int8_t off = KERNEL_SIZE / 2;
 
     // si el pixel está en el borde, se hace igual a la imagen original
     // ( sin blure ni nada )
@@ -250,16 +273,14 @@ void blure_pixel(struct position * position)
     uint32_t acum_green = 0;
     uint32_t acum_red = 0;
 
-    int32_t i = -1 * off;
-    for(; i <= off; i++)
+    for(int8_t i = (int8_t) -off; i <= off; i++)
       {
-        int32_t j = -1 * off;
-        for(; j <= off; j++)
+        for(int8_t j = (int8_t) -off; j <= off; j++)
           {
-            int32_t ker_i = i + off;
-            int32_t ker_j = j + off;
-            int32_t bmp_i = i + position->y;
-            int32_t bmp_j = j + position->x;
+            int8_t ker_i  = ( (int8_t)  (i + off) );
+            int8_t ker_j  = ( (int8_t)  (j + off) );
+            int16_t bmp_i = ( (int16_t) (i + position->y) );
+            int16_t bmp_j = ( (int16_t) (j + position->x) );
 
             acum_blue   = ( (uint32_t) (acum_blue
                           + (uint32_t) kernel[ker_i][ker_j]
@@ -275,23 +296,12 @@ void blure_pixel(struct position * position)
           }
       }
 
-      // chequeo de overflow (TODO: podria omitirse)
-      uint32_t aux;
-
-      aux = acum_blue / (uint32_t) pow(KERNEL_SIZE, 2);
-      if(aux > 255)
-        aux = 255;
-      bmp_edited->data[position->y][position->x].blue = (uint8_t) aux;
-
-      aux = acum_green / (uint32_t) pow(KERNEL_SIZE, 2);
-      if(aux > 255)
-        aux = 255;
-      bmp_edited->data[position->y][position->x].green = (uint8_t) aux;
-
-      aux = acum_red / (uint32_t) pow(KERNEL_SIZE, 2);
-      if(aux > 255)
-        aux = 255;
-      bmp_edited->data[position->y][position->x].red = (uint8_t) aux;
+      bmp_edited->data[position->y][position->x].blue = ( (uint8_t)
+                  (acum_blue / pow(KERNEL_SIZE, 2)) );
+      bmp_edited->data[position->y][position->x].green = ( (uint8_t)
+                  (acum_green / pow(KERNEL_SIZE, 2)) );
+      bmp_edited->data[position->y][position->x].red = ( (uint8_t)
+                  (acum_red / pow(KERNEL_SIZE, 2)) );
   }
 
 /*
@@ -300,8 +310,24 @@ void blure_pixel(struct position * position)
  * @param x coordenada x
  * @param y coordenada y
  */
-void set_position(struct position * position, int32_t x, int32_t y)
+void set_position(struct position * position, int16_t x, int16_t y)
   {
     position->x = x;
     position->y = y;
+  }
+
+/**
+ * Comienzo a medir tiempo
+ */
+void start_time()
+  {
+    start = omp_get_wtime();
+  }
+
+/**
+ * Termino de medir tiempo
+ */
+void stop_time()
+  {
+    seconds = omp_get_wtime() - start;
   }

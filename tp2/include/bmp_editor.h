@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <math.h>
+#include <time.h>
+#include <omp.h>
+#include <signal.h>
 
 #include "simple_bmp.h"
 
@@ -19,8 +22,8 @@
 #define EDITED_IMAGE_PATH "./resources/edited_image.bmp"
 
 typedef struct position {
-  int32_t x;
-  int32_t y;
+  int16_t x;
+  int16_t y;
 } position;
 
 enum areas {
@@ -38,8 +41,10 @@ enum return_values radio_input();
 enum return_values edit_image();
 enum return_values open_image();
 void set_kernel(uint8_t**);
-void rutina_salida();
+void rutina_salida(int32_t);
 void view_images();
 void blure_pixel(struct position *);
 void increase_pixel_contrast_brightness(struct position *);
-void set_position(struct position *, int32_t, int32_t);
+void set_position(struct position *, int16_t, int16_t);
+void start_time();
+void stop_time();
