@@ -5,6 +5,7 @@ char input[INPUT_SIZE];
 struct _sbmp_image *bmp_original;
 struct _sbmp_image *bmp_edited;
 uint8_t kernel[KERNEL_SIZE][KERNEL_SIZE];
+uint16_t norm;
 double start, seconds;
 
 /**
@@ -36,16 +37,6 @@ int32_t main( int32_t argc, char *argv[] )
     printf("<----------------------------------------------------------->\n");
     printf("\n");
     fflush(stdout);
-
-    // seteo de kernel
-    for(int8_t i = 0; i < KERNEL_SIZE; i++)
-      {
-        for(int8_t j = 0; j < KERNEL_SIZE; j++)
-          {
-            kernel[i][j] = 1;
-          }
-      }
-    kernel[KERNEL_SIZE / 2][KERNEL_SIZE / 2] = 2;
 
     printf("Abriendo imágen...\n");
     if( open_image() == FAILURE)
@@ -297,11 +288,11 @@ void blure_pixel(struct position * position)
       }
 
       bmp_edited->data[position->y][position->x].blue = ( (uint8_t)
-                  (acum_blue / pow(KERNEL_SIZE, 2)) );
+                  (acum_blue / norm) );
       bmp_edited->data[position->y][position->x].green = ( (uint8_t)
-                  (acum_green / pow(KERNEL_SIZE, 2)) );
+                  (acum_green / norm) );
       bmp_edited->data[position->y][position->x].red = ( (uint8_t)
-                  (acum_red / pow(KERNEL_SIZE, 2)) );
+                  (acum_red / norm) );
   }
 
 /*
@@ -330,4 +321,20 @@ void start_time()
 void stop_time()
   {
     seconds = omp_get_wtime() - start;
+  }
+
+/**
+ * Inicializacion de kernel y de variable normalizadora
+ */
+void set_kernel()
+  {
+    for(int8_t i = 0; i < KERNEL_SIZE; i++)
+      {
+        for(int8_t j = 0; j < KERNEL_SIZE; j++)
+          {
+            kernel[i][j] = 1;
+          }
+      }
+    kernel[KERNEL_SIZE / 2][KERNEL_SIZE / 2] = 2;
+    norm = (int16_t) pow(KERNEL_SIZE, 2) + 1;
   }

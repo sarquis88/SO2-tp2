@@ -66,13 +66,27 @@ enum sbmp_codes sbmp_save_bmp (const char *filename, const sbmp_image *image)
   fwrite (&image->type, sizeof (image->type), 1, fd);
   fwrite (&image->info, sizeof (image->info), 1, fd);
 
+  // Padding is necessary?
+  size_t padd_size = ((size_t)image->info.image_width * sizeof(sbmp_raw_data)) % PADDINGSIZE;
+  uint8_t* zero_pad = NULL;
+
+  if(0 != padd_size){ // Yes
+      padd_size = PADDINGSIZE - padd_size;
+      zero_pad = (uint8_t*) calloc(PADDINGSIZE, sizeof(uint8_t));
+  }
+
   for (int32_t i = image->info.image_height - 1; i >= 0; i--)
     {
       fwrite (image->data[i],
               sizeof (sbmp_raw_data),
-              (uint32_t) (image->info.image_width + image->info.image_width % 4),
+              (uint32_t) image->info.image_width ,
               fd);
+      if(NULL != zero_pad)
+        fwrite(zero_pad, sizeof(uint8_t), padd_size , fd);
     }
+
+    if(!zero_pad)
+      free(zero_pad);
 
   return SBMP_OK;
 }
@@ -93,7 +107,7 @@ enum sbmp_codes sbmp_load_bmp (const char *filename, sbmp_image *image)
   if (image->data == NULL)
     {
       fprintf (stderr, "Error: %s\n", strerror (errno));
-      fclose (fd);
+      fclose(fd);
       return SBMP_ERROR_FILE;
     }
 

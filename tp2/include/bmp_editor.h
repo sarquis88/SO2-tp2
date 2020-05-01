@@ -40,7 +40,7 @@ enum areas get_position_area();
 enum return_values radio_input();
 enum return_values edit_image();
 enum return_values open_image();
-void set_kernel(uint8_t**);
+void set_kernel();
 void rutina_salida(int32_t);
 void view_images();
 void blure_pixel(struct position *);
