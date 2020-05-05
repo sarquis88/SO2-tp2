@@ -3,7 +3,8 @@
 struct _sbmp_image *bmp_original;
 long radio;
 uint16_t ** kernel, norm;
-int8_t offset;
+int8_t off;
+double time_s;
 
 /**
  *  Funcion principal
@@ -36,20 +37,26 @@ int32_t main( int32_t argc, char *argv[] )
       exit(EXIT_FAILURE);
     printf("Imágen abierta\n");
 
-    kernel = calloc (KERNEL_SIZE, sizeof (int *));
-    for (int k = 0; k < KERNEL_SIZE; k++)
+    printf("Seteando kernel...\n");
+    kernel = calloc (KERNEL_SIZE, sizeof (int8_t *));
+    for (int8_t k = 0; k < KERNEL_SIZE; k++)
       kernel[k] = calloc (KERNEL_SIZE, sizeof (uint16_t));
     set_kernel(kernel);
-
     norm = get_norm(kernel);
+    printf("Kernel seteado\n");
 
     printf("Contraste: %.2f\n", CONTRAST);
     printf("Brillo: %d\n", BRIGHTNESS);
     printf("Tamaño del kernel: %dx%d\n", KERNEL_SIZE, KERNEL_SIZE);
     printf("Cantidad de hilos: %d\n", threads );
 
-    double start, seconds, acum_time;
-    acum_time = 0;
+    printf("\n");
+    printf("<----------------------------------------------------------->\n");
+    printf("<----------------------------------------------------------->\n");
+    printf("<----------------------------------------------------------->\n");
+    printf("\n");
+    fflush(stdout);
+
     radio = 0;
 
     while (1)
@@ -59,37 +66,44 @@ int32_t main( int32_t argc, char *argv[] )
 
         int8_t corridas = 0;
         int8_t input = radio_input();
-        if( input == INPUT_OK)
-          corridas = 1;
-        else if( input == INPUT_TEST)
-          corridas = TEST_CORRIDAS;
-        else if( input == INPUT_ERR || input == INPUT_EXIT)
-          rutina_salida(SUCCES);
+        switch (input) {
+          case INPUT_OK:
+            {
+              corridas = 1;
+              break;
+            }
+          case INPUT_TEST:
+            {
+              corridas = TEST_CORRIDAS;
+              break;
+            }
+          default:
+            {
+              rutina_salida(EXIT_FAILURE);
+              break;
+            }
+        }
 
         for(int8_t i = 0; i < corridas; i++)
           {
             printf("Radio: %ld pixeles\n", radio);
-
             printf("Editando imágen...\n");
-            start = get_time();
             if( edit_image() == FAILURE)
               exit(EXIT_FAILURE);
-            seconds = get_time() - start;
             printf("Imágen editada\n");
             printf("Edición guardada en: %s\n", EDITED_IMAGE_PATH);
+            printf("Tiempo: %0.2f segundos\n", time_s);
 
-            printf("Tiempo: %0.2f segundos\n", seconds);
-
+            double acum_time = 0;
             if( input == INPUT_TEST )
               {
-                acum_time += seconds;
+                acum_time += time_s;
                 printf("Tiempo promedio: %0.2f segundos\n",
                         acum_time / (i + 1) );
                 printf("Corrida nro: %d\n\n", i + 1);
               }
           }
       }
-
     return SUCCES;
   }
 
@@ -142,12 +156,13 @@ enum input_codes radio_input()
 
 /**
  *  Rutina de ejecución cuando se sale del programa sin errores
+ *  @param sig parametro de salida
  */
 void rutina_salida(int32_t sig)
   {
     if(sig)
       printf("\nSaliendo...\n");
-    exit(SUCCES);
+    exit(sig);
   }
 
 /**
@@ -194,36 +209,50 @@ enum return_values edit_image()
        return FAILURE;
      }
 
-    offset = KERNEL_SIZE / 2;
+    off = KERNEL_SIZE / 2;
     if(KERNEL_SIZE % 2 == 0)
-      offset--;
+      off--;
 
-    struct position *center = malloc(sizeof(struct position));
-    set_position( center, ( (int16_t) (bmp_edited->info.image_width / 2) ),
-                          ( (int16_t) (bmp_edited->info.image_height / 2) ) );
+    int16_t center_x = (int16_t) (bmp_edited->info.image_width / 2);
+    int16_t center_y = (int16_t) (bmp_edited->info.image_height / 2);
 
     int8_t area = 0;
+    double start = get_time();
     #pragma omp parallel for schedule(static)
     for(int16_t i = 0; i < bmp_edited->info.image_height; i++)
       {
         for(int16_t j = 0; j < bmp_edited->info.image_width; j++)
           {
-            struct position * position = malloc(sizeof(struct position));
-            set_position(position, j, i);
-            area = get_position_area(bmp_edited, position, center);
-            if( area == EX_AREA )
-              blure_pixel(bmp_edited, position);
-            else if( area == IN_AREA)
-              increase_pixel_contrast_brightness(bmp_edited, position);
-            else
-              edit_limits(bmp_edited, position);
-            free(position);
+            area = get_position_area( bmp_edited, j, i, center_x, center_y);
+            switch (area)
+              {
+                case EX_AREA:
+                  {
+                    blure_pixel(bmp_edited, j, i);
+                    break;
+                  }
+                case IN_AREA:
+                  {
+                    increase_pixel_contrast_brightness(bmp_edited, j, i);
+                    break;
+                  }
+                case LIM_AREA:
+                  {
+                    edit_limits(bmp_edited, j, i);
+                    break;
+                  }
+                default:
+                  {
+                    printf("ERROR ANALIZANDO AREA DE PIXEL\n");
+                    rutina_salida(EXIT_FAILURE);
+                  }
+              }
           }
       }
+    time_s = get_time() - start;
 
     sbmp_save_bmp(EDITED_IMAGE_PATH, bmp_edited);
     free(bmp_edited);
-    free(center);
     return SUCCES;
   }
 
@@ -231,26 +260,28 @@ enum return_values edit_image()
  * Indica el area en la cual se encuentra el pixel ingresado con respecto
  * al centro de la imagen
  * @param bmp_edited imagen a editar
- * @param position position del pixel a analizar
- * @param center posicion del pixel central de imágen
+ * @param pixel_x coordenada x de pixel
+ * @param pixel_y coordenada y de pixel
+ * @param center_x coordenada x de centro
+ * @param center_y coordenada y de pixel
  * @return EX_AREA para area externa o IN_AREA para area interna
  */
 enum areas get_position_area( struct _sbmp_image * bmp_edited,
-                              struct position * position,
-                              struct position * center)
+                              int16_t pixel_x, int16_t pixel_y,
+                              int16_t center_x, int16_t center_y)
  {
    double distance;
-   distance = pow(position->x - center->x, 2)
-              + pow(position->y - center->y, 2);
+   distance = pow(pixel_x - center_x, 2)
+              + pow(pixel_y - center_y, 2);
    distance = sqrt(distance);
 
    if( distance <= radio)
     return IN_AREA;
 
-   if( position->x < offset || position->y < offset )
+   if( pixel_x < off || pixel_y < off )
     return LIM_AREA;
-   if(            position->x + offset >= bmp_edited->info.image_width
-              ||  position->y + offset >= bmp_edited->info.image_height)
+   if(            pixel_x + off >= bmp_edited->info.image_width
+              ||  pixel_y + off >= bmp_edited->info.image_height)
     return LIM_AREA;
 
    return EX_AREA;
@@ -261,104 +292,85 @@ enum areas get_position_area( struct _sbmp_image * bmp_edited,
  * El contraste aumenta en proporcion CONTRAST
  * El brillo aumenta en valor BRIGHTNESS
  * @param bmp_edited imagen a editar
- * @param position posicion del pixel a modificar
+ * @param pixel_x coordenada x de pixel
+ * @param pixel_y coordenada y de pixel
  */
 void increase_pixel_contrast_brightness(struct _sbmp_image *bmp_edited,
-                                        struct position * position)
+                                        int16_t pixel_x, int16_t pixel_y)
   {
     int16_t aux;
 
-    aux = ( (int16_t) (bmp_original->data[position->y][position->x].blue
+    aux = ( (int16_t) (bmp_original->data[pixel_y][pixel_x].blue
             * CONTRAST + BRIGHTNESS) );
     if(aux >= 255)
         aux = 255;
-    bmp_edited->data[position->y][position->x].blue = (uint8_t) aux;
+    bmp_edited->data[pixel_y][pixel_x].blue = (uint8_t) aux;
 
-    aux = ( (int16_t) (bmp_original->data[position->y][position->x].green
+    aux = ( (int16_t) (bmp_original->data[pixel_y][pixel_x].green
             * CONTRAST + BRIGHTNESS) );
     if(aux >= 255)
         aux = 255;
-    bmp_edited->data[position->y][position->x].green = (uint8_t) aux;
+    bmp_edited->data[pixel_y][pixel_x].green = (uint8_t) aux;
 
-    aux = ( (int16_t) (bmp_original->data[position->y][position->x].red
+    aux = ( (int16_t) (bmp_original->data[pixel_y][pixel_x].red
             * CONTRAST + BRIGHTNESS) );
     if(aux >= 255)
         aux = 255;
-    bmp_edited->data[position->y][position->x].red = (uint8_t) aux;
+    bmp_edited->data[pixel_y][pixel_x].red = (uint8_t) aux;
   }
 
 /*
  * Edicion de limites de imágen en los cuales no se hace blureado ni aumento
  * de contraste o brillo. Estos pixeles se dejan iguales a los originales
- * @param position posicion del pixel
  * @param bmp_edited imagen a editar
+ * @param pixel_x coordenada x de pixel
+ * @param pixel_y coordenada y de pixel
  */
-void edit_limits(struct _sbmp_image * bmp_edited, struct position * position)
+void edit_limits(struct _sbmp_image * bmp_edited, int16_t pixel_x,
+                                                  int16_t pixel_y)
   {
-    bmp_edited->data[position->y][position->x].blue =
-      bmp_original->data[position->y][position->x].blue;
-    bmp_edited->data[position->y][position->x].green =
-      bmp_original->data[position->y][position->x].green;
-    bmp_edited->data[position->y][position->x].red =
-      bmp_original->data[position->y][position->x].red;
+    bmp_edited->data[pixel_y][pixel_x].blue =
+      bmp_original->data[pixel_y][pixel_x].blue;
+    bmp_edited->data[pixel_y][pixel_x].green =
+      bmp_original->data[pixel_y][pixel_x].green;
+    bmp_edited->data[pixel_y][pixel_x].red =
+      bmp_original->data[pixel_y][pixel_x].red;
   }
 
 /**
  * Blurea el pixel ingresado realizando convolusion
- * @param position posicion del pixel a blurear
+ * @param bmp_edited imagen a editar
+ * @param pixel_x coordenada x de pixel
+ * @param pixel_y coordenada y de pixel
  */
-void blure_pixel( struct _sbmp_image *bmp_edited, struct position * position)
+void blure_pixel( struct _sbmp_image *bmp_edited, int16_t pixel_x,
+                                                  int16_t pixel_y)
   {
     uint32_t acum_blue = 0;
     uint32_t acum_green = 0;
     uint32_t acum_red = 0;
 
-    int8_t ker_i;
-    int16_t bmp_i;
-    int8_t ker_j;
-    int16_t bmp_j;
-
-    for(int8_t i = (int8_t) -offset; i <= offset; i++)
+    for(int8_t i = (int8_t) -off; i <= off; i++)
       {
-
-        ker_i  = ( (int8_t)  (i + offset) );
-        bmp_i = ( (int16_t) (i + position->y) );
-
-        for(int8_t j = (int8_t) -offset; j <= offset; j++)
+        for(int8_t j = (int8_t) -off; j <= off; j++)
           {
+            acum_blue   += (  (uint32_t) kernel[i + off][j + off] *
+                            bmp_original->data[i + pixel_y][j + pixel_x].blue);
 
-            ker_j  = ( (int8_t)  (j + offset) );
-            bmp_j = ( (int16_t) (j + position->x) );
+            acum_green  += (  (uint32_t) kernel[i + off][j + off] *
+                            bmp_original->data[i + pixel_y][j + pixel_x].green);
 
-            acum_blue   += (  (uint32_t) kernel[ker_i][ker_j]
-                              * bmp_original->data[bmp_i][bmp_j].blue);
-
-            acum_green  += (  (uint32_t) kernel[ker_i][ker_j]
-                              * bmp_original->data[bmp_i][bmp_j].green);
-
-            acum_red    += (   (uint32_t) kernel[ker_i][ker_j]
-                              * bmp_original->data[bmp_i][bmp_j].red);
+            acum_red    += (   (uint32_t) kernel[i + off][j + off] *
+                            bmp_original->data[i + pixel_y][j + pixel_x].red);
           }
       }
 
-      bmp_edited->data[position->y][position->x].blue = ( (uint8_t)
+      bmp_edited->data[pixel_y][pixel_x].blue = ( (uint8_t)
                   (acum_blue / norm) );
-      bmp_edited->data[position->y][position->x].green = ( (uint8_t)
+      bmp_edited->data[pixel_y][pixel_x].green = ( (uint8_t)
                   (acum_green / norm) );
-      bmp_edited->data[position->y][position->x].red = ( (uint8_t)
+      bmp_edited->data[pixel_y][pixel_x].red = ( (uint8_t)
                   (acum_red / norm) );
-  }
-
-/*
- * Setea la posicion de la estructura ingresada
- * @param position struct de posicion inicializada
- * @param x coordenada x
- * @param y coordenada y
- */
-void set_position(struct position * position, int16_t x, int16_t y)
-  {
-    position->x = x;
-    position->y = y;
   }
 
 /**
@@ -371,31 +383,6 @@ double get_time()
   }
 
 /**
- * Inicializacion de kernel
- * @param kernel matriz kernel a setear
- */
-void set_kernel(uint16_t ** kernel)
-  {
-    for(int8_t i = 0; i < KERNEL_SIZE; i++)
-      {
-        for(int8_t j = 0; j < KERNEL_SIZE; j++)
-          {
-            kernel[i][j] = 1;
-          }
-      }
-
-    if(KERNEL_SIZE % 2 == 0)
-      {
-        kernel[KERNEL_SIZE / 2]     [KERNEL_SIZE / 2] = 2;
-        kernel[KERNEL_SIZE / 2]     [KERNEL_SIZE / 2 - 1] = 2;
-        kernel[KERNEL_SIZE / 2 - 1] [KERNEL_SIZE / 2] = 2;
-        kernel[KERNEL_SIZE / 2 - 1] [KERNEL_SIZE / 2 - 1] = 2;
-      }
-    else
-      kernel[KERNEL_SIZE / 2][KERNEL_SIZE / 2] = 2;
-  }
-
-/**
  *  Getter de valor de normalizacion
  *  @param kernel kernel usado
  *  @return valor de la normalizacion
@@ -405,10 +392,61 @@ uint16_t get_norm(uint16_t ** kernel)
     uint16_t norm = 0;
     for (int16_t i = 0; i < KERNEL_SIZE; i++)
       {
-        for (int j = 0; j < KERNEL_SIZE; j++)
+        for (int16_t j = 0; j < KERNEL_SIZE; j++)
           {
             norm = ( (uint16_t) ( norm + kernel[i][j] ) );
           }
       }
     return norm;
+  }
+
+/**
+ *  Imprime el kernel. Usado para debug
+ *  @param kernel kernel a imprimir
+ */
+void print_kernel(uint16_t ** kernel)
+  {
+    for (int16_t i = 0; i < KERNEL_SIZE; i++)
+      {
+        for (int16_t j = 0; j < KERNEL_SIZE; j++)
+          {
+            printf("%d ", kernel[i][j]);
+          }
+        printf("\n");
+      }
+  }
+
+  /**
+   * Inicializacion de kernel
+   * @param kernel matriz kernel a setear
+   */
+void set_kernel(uint16_t **kernel)
+  {
+    uint16_t st_val = 1;
+    for (int8_t j = 0; j < KERNEL_SIZE; j++)
+      {
+        kernel[0][j] = st_val;
+        kernel[KERNEL_SIZE - 1][j] = st_val;
+      }
+
+    for (int8_t i = 1; i < KERNEL_SIZE / 2 + 1; i++)
+      {
+        for (int8_t j = 0; j < KERNEL_SIZE; j++)
+          {
+            if (j >= i && j < (KERNEL_SIZE - i))
+              kernel[i][j] = (uint16_t) (kernel[i - 1][j] + (uint16_t) 1);
+            else
+              kernel[i][j] = kernel[i - 1][j];
+          }
+      }
+    for (int8_t i = 1; i < KERNEL_SIZE / 2; i++)
+      {
+        for (int8_t j = 0; j < KERNEL_SIZE; j++)
+          {
+            int8_t index = ( (int8_t) (KERNEL_SIZE / 2 - i) );
+            if(KERNEL_SIZE % 2 == 0)
+              index--;
+            kernel[i + KERNEL_SIZE / 2][j] = kernel[index][j];
+          }
+      }
   }

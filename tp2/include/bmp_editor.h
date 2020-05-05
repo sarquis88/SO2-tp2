@@ -22,11 +22,6 @@
 #define ORIGINAL_IMAGE_PATH "./resources/original_image.bmp"
 #define EDITED_IMAGE_PATH "./resources/edited_image.bmp"
 
-typedef struct position {
-  int16_t x;
-  int16_t y;
-} position;
-
 enum areas {
   EX_AREA = 0,
   IN_AREA = 1,
@@ -46,17 +41,19 @@ enum input_codes {
 };
 
 enum areas get_position_area( struct _sbmp_image *,
-                              struct position*, struct position*);
+                              int16_t, int16_t,
+                              int16_t, int16_t);
 enum input_codes radio_input();
 enum return_values edit_image();
 enum return_values open_image();
 void set_kernel(uint16_t**);
 void rutina_salida(int32_t);
 void view_images();
-void blure_pixel(struct _sbmp_image *, struct position *);
+void blure_pixel(struct _sbmp_image *, int16_t, int16_t);
 void increase_pixel_contrast_brightness(struct _sbmp_image *,
-                                        struct position *);
-void edit_limits(struct _sbmp_image *, struct position *);
-void set_position(struct position *, int16_t, int16_t);
+                                        int16_t, int16_t);
+void edit_limits(struct _sbmp_image *, int16_t, int16_t);
+void set_position(int16_t, int16_t, int16_t, int16_t);
+void print_kernel(uint16_t**);
 uint16_t get_norm(uint16_t**);
 double get_time();
