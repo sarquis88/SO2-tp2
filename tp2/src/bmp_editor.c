@@ -3,6 +3,7 @@
 struct _sbmp_image *bmp_original;
 long radio;
 uint16_t ** kernel, norm;
+int8_t offset;
 
 /**
  *  Funcion principal
@@ -82,7 +83,8 @@ int32_t main( int32_t argc, char *argv[] )
             if( input == INPUT_TEST )
               {
                 acum_time += seconds;
-                printf("Tiempo promedio: %0.2f segundos\n", acum_time / (i + 1) );
+                printf("Tiempo promedio: %0.2f segundos\n",
+                        acum_time / (i + 1) );
                 printf("Corrida nro: %d\n\n", i + 1);
               }
           }
@@ -192,29 +194,32 @@ enum return_values edit_image()
        return FAILURE;
      }
 
+    offset = KERNEL_SIZE / 2;
+    if(KERNEL_SIZE % 2 == 0)
+      offset--;
+
     struct position *center = malloc(sizeof(struct position));
     set_position( center, ( (int16_t) (bmp_edited->info.image_width / 2) ),
                           ( (int16_t) (bmp_edited->info.image_height / 2) ) );
 
     int8_t area = 0;
-
-    #pragma omp parallel for schedule(guided)
-      for(int16_t i = 0; i < bmp_edited->info.image_height; i++)
-        {
-          for(int16_t j = 0; j < bmp_edited->info.image_width; j++)
-            {
-              struct position * position = malloc(sizeof(struct position));
-              set_position(position, j, i);
-              area = get_position_area(bmp_edited, position, center);
-              if( area == EX_AREA )
-                blure_pixel(bmp_edited, position);
-              else if( area == IN_AREA)
-                increase_pixel_contrast_brightness(bmp_edited, position);
-              else
-                edit_limits(bmp_edited, position);
-              free(position);
-            }
-        }
+    #pragma omp parallel for schedule(static)
+    for(int16_t i = 0; i < bmp_edited->info.image_height; i++)
+      {
+        for(int16_t j = 0; j < bmp_edited->info.image_width; j++)
+          {
+            struct position * position = malloc(sizeof(struct position));
+            set_position(position, j, i);
+            area = get_position_area(bmp_edited, position, center);
+            if( area == EX_AREA )
+              blure_pixel(bmp_edited, position);
+            else if( area == IN_AREA)
+              increase_pixel_contrast_brightness(bmp_edited, position);
+            else
+              edit_limits(bmp_edited, position);
+            free(position);
+          }
+      }
 
     sbmp_save_bmp(EDITED_IMAGE_PATH, bmp_edited);
     free(bmp_edited);
@@ -242,14 +247,10 @@ enum areas get_position_area( struct _sbmp_image * bmp_edited,
    if( distance <= radio)
     return IN_AREA;
 
-   int8_t off = KERNEL_SIZE / 2;
-   if(KERNEL_SIZE % 2 == 0)
-    off--;
-
-   if( position->x < off || position->y < off )
+   if( position->x < offset || position->y < offset )
     return LIM_AREA;
-   if(            position->x + off >= bmp_edited->info.image_width
-              ||  position->y + off >= bmp_edited->info.image_height)
+   if(            position->x + offset >= bmp_edited->info.image_width
+              ||  position->y + offset >= bmp_edited->info.image_height)
     return LIM_AREA;
 
    return EX_AREA;
@@ -308,10 +309,6 @@ void edit_limits(struct _sbmp_image * bmp_edited, struct position * position)
  */
 void blure_pixel( struct _sbmp_image *bmp_edited, struct position * position)
   {
-    int8_t off = KERNEL_SIZE / 2;
-    if(KERNEL_SIZE % 2 == 0)
-     off--;
-
     uint32_t acum_blue = 0;
     uint32_t acum_green = 0;
     uint32_t acum_red = 0;
@@ -321,16 +318,16 @@ void blure_pixel( struct _sbmp_image *bmp_edited, struct position * position)
     int8_t ker_j;
     int16_t bmp_j;
 
-    for(int8_t i = (int8_t) -off; i <= off; i++)
+    for(int8_t i = (int8_t) -offset; i <= offset; i++)
       {
 
-        ker_i  = ( (int8_t)  (i + off) );
+        ker_i  = ( (int8_t)  (i + offset) );
         bmp_i = ( (int16_t) (i + position->y) );
 
-        for(int8_t j = (int8_t) -off; j <= off; j++)
+        for(int8_t j = (int8_t) -offset; j <= offset; j++)
           {
 
-            ker_j  = ( (int8_t)  (j + off) );
+            ker_j  = ( (int8_t)  (j + offset) );
             bmp_j = ( (int16_t) (j + position->x) );
 
             acum_blue   += (  (uint32_t) kernel[ker_i][ker_j]

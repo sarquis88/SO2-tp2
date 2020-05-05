@@ -17,8 +17,7 @@
 #define CONTRAST    ( (double) 1.3 )
 #define BRIGHTNESS  ( (uint8_t) 30 )
 
-// tiene que ser impar !!!
-#define KERNEL_SIZE    ( (int8_t) 20 )
+#define KERNEL_SIZE    ( (int8_t) 41 )
 
 #define ORIGINAL_IMAGE_PATH "./resources/original_image.bmp"
 #define EDITED_IMAGE_PATH "./resources/edited_image.bmp"
@@ -51,7 +50,7 @@ enum areas get_position_area( struct _sbmp_image *,
 enum input_codes radio_input();
 enum return_values edit_image();
 enum return_values open_image();
-void set_kernel();
+void set_kernel(uint16_t**);
 void rutina_salida(int32_t);
 void view_images();
 void blure_pixel(struct _sbmp_image *, struct position *);
