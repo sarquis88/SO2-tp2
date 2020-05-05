@@ -84,6 +84,7 @@ int32_t main( int32_t argc, char *argv[] )
             }
         }
 
+        double acum_time;
         for(int8_t i = 0; i < corridas; i++)
           {
             printf("Radio: %ld pixeles\n", radio);
@@ -94,7 +95,7 @@ int32_t main( int32_t argc, char *argv[] )
             printf("Edición guardada en: %s\n", EDITED_IMAGE_PATH);
             printf("Tiempo: %0.2f segundos\n", time_s);
 
-            double acum_time = 0;
+            acum_time = 0;
             if( input == INPUT_TEST )
               {
                 acum_time += time_s;
