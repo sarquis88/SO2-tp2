@@ -1,4 +1,4 @@
-#include "../include/bmp_editor.h"
+  #include "../include/bmp_editor.h"
 
 struct _sbmp_image *bmp_original;
 long radio;
@@ -11,19 +11,19 @@ double time_s;
  */
 int32_t main( int32_t argc, char *argv[] )
   {
-
     // chequeo de argumentos
-  	if ( argc < 2 ) {
-  		printf("Uso: %s <cantidad_threads>\n", argv[0]);
-  		exit(1);
-  	}
+  	if ( argc < 2 )
+      {
+    		printf("Uso: %s <cantidad_threads>\n", argv[0]);
+    		rutina_salida(EXIT_FAILURE);
+  	  }
 
     int8_t threads = (int8_t) strtol(argv[1], NULL, 10);
     omp_set_num_threads( threads );
 
-  	struct sigaction sa;
-    sa.sa_handler = rutina_salida;
-  	sigaction(SIGINT, &sa,  NULL);
+    struct sigaction sig_act;
+    sig_act.sa_handler = rutina_salida;
+  	sigaction(SIGINT, &sig_act,  NULL);
 
     printf("\n");
     printf("<----------------------------------------------------------->\n");
@@ -34,7 +34,7 @@ int32_t main( int32_t argc, char *argv[] )
 
     printf("Abriendo imágen...\n");
     if( open_image() == FAILURE)
-      exit(EXIT_FAILURE);
+      rutina_salida(EXIT_FAILURE);
     printf("Imágen abierta\n");
 
     printf("Seteando kernel...\n");
@@ -77,6 +77,11 @@ int32_t main( int32_t argc, char *argv[] )
               corridas = TEST_CORRIDAS;
               break;
             }
+          case INPUT_EXIT:
+            {
+              rutina_salida(SUCCES);
+              break;
+            }
           default:
             {
               rutina_salida(EXIT_FAILURE);
@@ -84,24 +89,42 @@ int32_t main( int32_t argc, char *argv[] )
             }
         }
 
-        double acum_time;
+        double acum_time = 0;
+        double tiempos[corridas];
         for(int8_t i = 0; i < corridas; i++)
           {
             printf("Radio: %ld pixeles\n", radio);
             printf("Editando imágen...\n");
             if( edit_image() == FAILURE)
-              exit(EXIT_FAILURE);
+              rutina_salida(EXIT_FAILURE);
             printf("Imágen editada\n");
             printf("Edición guardada en: %s\n", EDITED_IMAGE_PATH);
             printf("Tiempo: %0.2f segundos\n", time_s);
 
-            acum_time = 0;
-            if( input == INPUT_TEST )
-              {
+            if( input == INPUT_TEST ) // en modo test
+              {                       // calculos estadisticos
+                double avg;
+                tiempos[i] = time_s;
                 acum_time += time_s;
-                printf("Tiempo promedio: %0.2f segundos\n",
-                        acum_time / (i + 1) );
+                avg = acum_time / (i + 1);
+                printf("Tiempo promedio: %0.2f segundos\n", avg);
                 printf("Corrida nro: %d\n\n", i + 1);
+
+                if( i == corridas - 1 )
+                  {
+                    acum_time = 0;
+                    for(int8_t j = 0; j < corridas; j++)
+                      {
+                        if( tiempos[j] < avg )
+                          acum_time += avg - tiempos[j];
+                        else
+                          acum_time += tiempos[j] - avg;
+                      }
+                    double desv = acum_time / corridas;
+                    printf("Test terminado\n");
+                    printf("Tiempo promedio: %0.2f segundos\n", avg);
+                    printf("Desvio: %0.2f segundos\n", desv);
+                  }
               }
           }
       }
@@ -162,7 +185,15 @@ enum input_codes radio_input()
 void rutina_salida(int32_t sig)
   {
     if(sig)
-      printf("\nSaliendo...\n");
+      printf("\nSaliendo con errores...\n");
+    else
+      printf("\nSaliendo sin errores...\n");
+
+    for(int8_t i = 0; i < KERNEL_SIZE;i ++)
+      free(kernel[i]);
+    free(kernel);
+    free(bmp_original);
+
     exit(sig);
   }
 
@@ -177,7 +208,7 @@ enum return_values open_image()
     if( sbmp_load_bmp(ORIGINAL_IMAGE_PATH, bmp_original) == SBMP_OK )
       {
         printf("Imágen abierta\n");
-        printf("Tamaño: %d [MB]\n", bmp_original->info.image_size / 1048576);
+        printf("Tamaño: %u [MB]\n", bmp_original->info.image_size / 1048576);
         printf("Alto: %d [pixeles]\n", bmp_original->info.image_height);
         printf("Ancho: %d [pixeles]\n", bmp_original->info.image_width);
         fflush(stdout);
@@ -219,6 +250,7 @@ enum return_values edit_image()
 
     int8_t area = 0;
     double start = get_time();
+
     #pragma omp parallel for schedule(static)
     for(int16_t i = 0; i < bmp_edited->info.image_height; i++)
       {
@@ -390,21 +422,22 @@ double get_time()
  */
 uint16_t get_norm(uint16_t ** kernel)
   {
-    uint16_t norm = 0;
+    uint16_t norm_aux = 0;
     for (int16_t i = 0; i < KERNEL_SIZE; i++)
       {
         for (int16_t j = 0; j < KERNEL_SIZE; j++)
           {
-            norm = ( (uint16_t) ( norm + kernel[i][j] ) );
+            norm_aux = ( (uint16_t) ( norm_aux + kernel[i][j] ) );
           }
       }
-    return norm;
+    return norm_aux;
   }
 
 /**
  *  Imprime el kernel. Usado para debug
  *  @param kernel kernel a imprimir
  */
+/*
 void print_kernel(uint16_t ** kernel)
   {
     for (int16_t i = 0; i < KERNEL_SIZE; i++)
@@ -416,6 +449,7 @@ void print_kernel(uint16_t ** kernel)
         printf("\n");
       }
   }
+*/
 
   /**
    * Inicializacion de kernel
