@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <limits.h>
-#include <math.h>
 #include <time.h>
 #include <omp.h>
 #include <signal.h>
@@ -57,3 +56,18 @@ void set_position(int16_t, int16_t, int16_t, int16_t);
 void print_kernel(uint16_t**);
 uint16_t get_norm(uint16_t**);
 double get_time();
+
+// doxygen
+
+/*! \mainpage Trabajo Práctico II
+ * Alumno: Tomas Sarquis\n\n
+ * Matricula: 39884977\n\n
+ * Repositorio: https://github.com/Sistemas-Operativos-II-2020/so2-openmp--sarquis88\n\n
+ * Objetivos: el objetivo del presente trabajo práctico es que el estudiante sea capaz de diseñar e implementar un
+ * software que utilice el paradigma de memoria compartida, utilizando OpenMP.
+ * Temas:
+ *  - Programacion en C\n
+ *  - Conocimientos de los pragma de OMP\n
+ *  - Uso de las herramientas de profiling\n
+ *  - Manejo de imágenes en formato BMP\n\n
+ */

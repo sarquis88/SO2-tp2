@@ -19,6 +19,8 @@ int32_t main( int32_t argc, char *argv[] )
   	  }
 
     int8_t threads = (int8_t) strtol(argv[1], NULL, 10);
+    if(!threads)
+      threads = 1;
     omp_set_num_threads( threads );
 
     struct sigaction sig_act;
@@ -79,6 +81,11 @@ int32_t main( int32_t argc, char *argv[] )
             }
           case INPUT_EXIT:
             {
+              for(int8_t i = 0; i < KERNEL_SIZE;i ++)
+                free(kernel[i]);
+              free(kernel);
+              free(bmp_original);
+
               rutina_salida(SUCCES);
               break;
             }
@@ -188,11 +195,6 @@ void rutina_salida(int32_t sig)
       printf("\nSaliendo con errores...\n");
     else
       printf("\nSaliendo sin errores...\n");
-
-    for(int8_t i = 0; i < KERNEL_SIZE;i ++)
-      free(kernel[i]);
-    free(kernel);
-    free(bmp_original);
 
     exit(sig);
   }
@@ -304,11 +306,13 @@ enum areas get_position_area( struct _sbmp_image * bmp_edited,
                               int16_t center_x, int16_t center_y)
  {
    double distance;
-   distance = pow(pixel_x - center_x, 2)
-              + pow(pixel_y - center_y, 2);
-   distance = sqrt(distance);
+   // distance = pow(pixel_x - center_x, 2)
+   //            + pow(pixel_y - center_y, 2);
+   // distance = sqrt(distance);
 
-   if( distance <= radio)
+   distance = (pixel_x - center_x) * (pixel_x - center_x) +
+              (pixel_y - center_y) * (pixel_y - center_y);
+   if( distance <= radio * radio)
     return IN_AREA;
 
    if( pixel_x < off || pixel_y < off )

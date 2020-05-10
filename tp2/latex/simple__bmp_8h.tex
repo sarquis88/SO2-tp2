@@ -1,0 +1,330 @@
+\hypertarget{simple__bmp_8h}{}\section{include/simple\+\_\+bmp.h File Reference}
+\label{simple__bmp_8h}\index{include/simple\+\_\+bmp.\+h@{include/simple\+\_\+bmp.\+h}}
+{\ttfamily \#include $<$inttypes.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$errno.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{struct__sbmp__ftype__data}{\+\_\+sbmp\+\_\+ftype\+\_\+data}
+\begin{DoxyCompactList}\small\item\em Block 1\+: File Type Data, information about B\+MP File This block is a B\+MP Header labeled as B\+I\+T\+M\+A\+P\+F\+I\+L\+E\+H\+E\+A\+D\+ER (the name comes from c++ struct in Windows OS) \end{DoxyCompactList}\item 
+struct \hyperlink{struct__sbmp__iinfo__data}{\+\_\+sbmp\+\_\+iinfo\+\_\+data}
+\item 
+struct \hyperlink{struct__sbmp__raw__data}{\+\_\+sbmp\+\_\+raw\+\_\+data}
+\begin{DoxyCompactList}\small\item\em Pixel 24-\/bits description. \end{DoxyCompactList}\item 
+struct \hyperlink{struct__sbmp__image}{\+\_\+sbmp\+\_\+image}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{simple__bmp_8h_a7b8da625646a1d1b0bee14ae7b2a49cc}{B\+I\+T\+M\+A\+P\+I\+N\+F\+O\+H\+E\+A\+D\+ER}~40
+\item 
+\#define \hyperlink{simple__bmp_8h_a176b273782c4ef19a584f90bf0f4bb36}{T\+I\+F\+F\+\_\+\+M\+A\+G\+I\+C\+\_\+\+N\+U\+M\+B\+ER}~((0x4\+D $<$$<$ 8) $\vert$ 0x42)
+\item 
+\#define \hyperlink{simple__bmp_8h_a3718dbdddd2107e195c4b17d9f3d7c08}{P\+A\+D\+D\+I\+N\+G\+S\+I\+ZE}~4
+\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \hyperlink{struct__sbmp__image}{\+\_\+sbmp\+\_\+image} \hyperlink{simple__bmp_8h_a25a27bd49b5894cbd22f82b82cad3e04}{sbmp\+\_\+image}
+\end{DoxyCompactItemize}
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \hyperlink{simple__bmp_8h_ac95dedc44eee09ccd408bb929c77b5cf}{sbmp\+\_\+codes} \{ \hyperlink{simple__bmp_8h_ac95dedc44eee09ccd408bb929c77b5cfa2e2713669d691352dabf77ec2d7569f8}{S\+B\+M\+P\+\_\+\+E\+R\+R\+O\+R\+\_\+\+P\+A\+R\+AM} = -\/2, 
+\hyperlink{simple__bmp_8h_ac95dedc44eee09ccd408bb929c77b5cfa559e223fdd9cd087d0a0e75d82469aa6}{S\+B\+M\+P\+\_\+\+E\+R\+R\+O\+R\+\_\+\+F\+I\+LE}, 
+\hyperlink{simple__bmp_8h_ac95dedc44eee09ccd408bb929c77b5cfacdfe32e459afc69d84692bbd69f7d95a}{S\+B\+M\+P\+\_\+\+OK} = 0
+ \}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{struct__sbmp__ftype__data}{\+\_\+sbmp\+\_\+ftype\+\_\+data} \hyperlink{simple__bmp_8h_ac1c6dc675d49542b43f2c901f64bcbb6}{\+\_\+\+\_\+attribute\+\_\+\+\_\+} ((\+\_\+\+\_\+packed\+\_\+\+\_\+)) sbmp\+\_\+ftype\+\_\+data
+\begin{DoxyCompactList}\small\item\em Block 1\+: File Type Data, information about B\+MP File This block is a B\+MP Header labeled as B\+I\+T\+M\+A\+P\+F\+I\+L\+E\+H\+E\+A\+D\+ER (the name comes from c++ struct in Windows OS) \end{DoxyCompactList}\item 
+enum \hyperlink{simple__bmp_8h_ac95dedc44eee09ccd408bb929c77b5cf}{sbmp\+\_\+codes} \hyperlink{simple__bmp_8h_af7dc140822d0eec1f53cb1e5ff036380}{sbmp\+\_\+initialize\+\_\+bmp} (\hyperlink{simple__bmp_8h_a25a27bd49b5894cbd22f82b82cad3e04}{sbmp\+\_\+image} $\ast$image, uint32\+\_\+t height, uint32\+\_\+t width)
+\item 
+enum \hyperlink{simple__bmp_8h_ac95dedc44eee09ccd408bb929c77b5cf}{sbmp\+\_\+codes} \hyperlink{simple__bmp_8h_a1049cb65d9e6dcd887b4fb1d22446410}{sbmp\+\_\+save\+\_\+bmp} (const char $\ast$filename, const \hyperlink{simple__bmp_8h_a25a27bd49b5894cbd22f82b82cad3e04}{sbmp\+\_\+image} $\ast$image)
+\item 
+enum \hyperlink{simple__bmp_8h_ac95dedc44eee09ccd408bb929c77b5cf}{sbmp\+\_\+codes} \hyperlink{simple__bmp_8h_adcd7207abee7c3b976382d3de27232e8}{sbmp\+\_\+load\+\_\+bmp} (const char $\ast$filename, \hyperlink{simple__bmp_8h_a25a27bd49b5894cbd22f82b82cad3e04}{sbmp\+\_\+image} $\ast$image)
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+uint16\+\_\+t \hyperlink{simple__bmp_8h_ad5a78e4f6e8489d756f13809e3b5a7bf}{file\+\_\+type}
+\item 
+uint32\+\_\+t \hyperlink{simple__bmp_8h_acfc905fb689f590842c0152e3b8cd92e}{file\+\_\+size}
+\begin{DoxyCompactList}\small\item\em Entire file size in bytes. This value is basically the number of bytes in a B\+MP image file. \end{DoxyCompactList}\item 
+uint32\+\_\+t \hyperlink{simple__bmp_8h_aa43c4c21b173ada1b6b7568956f0d650}{reserved}
+\begin{DoxyCompactList}\small\item\em It should be initialized to \textquotesingle{}0\textquotesingle{} integer (unsigned) value. \end{DoxyCompactList}\item 
+uint32\+\_\+t \hyperlink{simple__bmp_8h_a0e322da8c7e3d2d6292089c0432f885d}{data\+\_\+offset}
+\item 
+uint32\+\_\+t \hyperlink{simple__bmp_8h_a841923a20e6dda97c59351c8e97c9be6}{header\+\_\+size}
+\item 
+int32\+\_\+t \hyperlink{simple__bmp_8h_ad2494d58b8995591a7a2172c723671d4}{image\+\_\+width}
+\begin{DoxyCompactList}\small\item\em The width of the final image in pixels. \end{DoxyCompactList}\item 
+int32\+\_\+t \hyperlink{simple__bmp_8h_a6e5c29548d08063a544d79bfa6ac4a09}{image\+\_\+height}
+\begin{DoxyCompactList}\small\item\em Height of the final image in pixels. \end{DoxyCompactList}\item 
+uint16\+\_\+t \hyperlink{simple__bmp_8h_a5f6caf51b5ce3eb6fc340a667126406b}{planes}
+\begin{DoxyCompactList}\small\item\em The number of color planes of the target device. Should be \textquotesingle{}1\textquotesingle{} in decimal. \end{DoxyCompactList}\item 
+uint16\+\_\+t \hyperlink{simple__bmp_8h_adf243ab54e91b0e1d112295908ab31e9}{bit\+\_\+per\+\_\+pixel}
+\begin{DoxyCompactList}\small\item\em The number of bits (memory) a pixel takes (in pixel data) to represent a color. \end{DoxyCompactList}\item 
+uint32\+\_\+t \hyperlink{simple__bmp_8h_aa379ffab5097352ba49ec9358c38cf4e}{compression}
+\begin{DoxyCompactList}\small\item\em The value of compression to use. Should be \textquotesingle{}0\textquotesingle{} in decimal to represent no-\/compression (identified by \textquotesingle{}B\+I\+\_\+\+R\+GB\textquotesingle{}). \end{DoxyCompactList}\item 
+uint32\+\_\+t \hyperlink{simple__bmp_8h_a42539ea8650b094f66be7a689243c5ef}{image\+\_\+size}
+\begin{DoxyCompactList}\small\item\em The final size of the compressed image. Should be \textquotesingle{}0\textquotesingle{} in decimal when no compression algorithm is used. \end{DoxyCompactList}\item 
+int32\+\_\+t \hyperlink{simple__bmp_8h_a58502cf50a0173a51dff0b74a650dbf4}{xpix\+\_\+per\+\_\+meter}
+\item 
+int32\+\_\+t \hyperlink{simple__bmp_8h_a89f4075b35033f13cc8a14885eb4c1ce}{ypix\+\_\+per\+\_\+meter}
+\begin{DoxyCompactList}\small\item\em the verical resolution of the target device \end{DoxyCompactList}\item 
+uint32\+\_\+t \hyperlink{simple__bmp_8h_ac47e1e873452a259637f8c3546339105}{total\+\_\+colors}
+\item 
+uint32\+\_\+t \hyperlink{simple__bmp_8h_aff2221f0aaf63fbe5c12a9cba0e27cbc}{important\+\_\+colors}
+\begin{DoxyCompactList}\small\item\em The number of important colors. Generally ignored by setting \textquotesingle{}0\textquotesingle{} decimal value. \end{DoxyCompactList}\item 
+uint8\+\_\+t \hyperlink{simple__bmp_8h_a287b397e90d7b995c81ff54e741f96b2}{blue}
+\item 
+uint8\+\_\+t \hyperlink{simple__bmp_8h_a90d21fa503b626c00cdc8d94863d5877}{green}
+\item 
+uint8\+\_\+t \hyperlink{simple__bmp_8h_ad47d918910aaa51c73160ac85999d09c}{red}
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\mbox{\Hypertarget{simple__bmp_8h_a7b8da625646a1d1b0bee14ae7b2a49cc}\label{simple__bmp_8h_a7b8da625646a1d1b0bee14ae7b2a49cc}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!B\+I\+T\+M\+A\+P\+I\+N\+F\+O\+H\+E\+A\+D\+ER@{B\+I\+T\+M\+A\+P\+I\+N\+F\+O\+H\+E\+A\+D\+ER}}
+\index{B\+I\+T\+M\+A\+P\+I\+N\+F\+O\+H\+E\+A\+D\+ER@{B\+I\+T\+M\+A\+P\+I\+N\+F\+O\+H\+E\+A\+D\+ER}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{B\+I\+T\+M\+A\+P\+I\+N\+F\+O\+H\+E\+A\+D\+ER}{BITMAPINFOHEADER}}
+{\footnotesize\ttfamily \#define B\+I\+T\+M\+A\+P\+I\+N\+F\+O\+H\+E\+A\+D\+ER~40}
+
+Created by jmorales on 4/22/20. \begin{DoxyAuthor}{Author}
+jmorales (\href{mailto:jmorales@unc.edu.ar}{\tt jmorales@unc.\+edu.\+ar})
+\end{DoxyAuthor}
+\href{https://itnext.io/bits-to-bitmaps-a-simple-walkthrough-of-bmp-image-format-765dc6857393}{\tt https\+://itnext.\+io/bits-\/to-\/bitmaps-\/a-\/simple-\/walkthrough-\/of-\/bmp-\/image-\/format-\/765dc6857393} \mbox{\Hypertarget{simple__bmp_8h_a3718dbdddd2107e195c4b17d9f3d7c08}\label{simple__bmp_8h_a3718dbdddd2107e195c4b17d9f3d7c08}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!P\+A\+D\+D\+I\+N\+G\+S\+I\+ZE@{P\+A\+D\+D\+I\+N\+G\+S\+I\+ZE}}
+\index{P\+A\+D\+D\+I\+N\+G\+S\+I\+ZE@{P\+A\+D\+D\+I\+N\+G\+S\+I\+ZE}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{P\+A\+D\+D\+I\+N\+G\+S\+I\+ZE}{PADDINGSIZE}}
+{\footnotesize\ttfamily \#define P\+A\+D\+D\+I\+N\+G\+S\+I\+ZE~4}
+
+\mbox{\Hypertarget{simple__bmp_8h_a176b273782c4ef19a584f90bf0f4bb36}\label{simple__bmp_8h_a176b273782c4ef19a584f90bf0f4bb36}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!T\+I\+F\+F\+\_\+\+M\+A\+G\+I\+C\+\_\+\+N\+U\+M\+B\+ER@{T\+I\+F\+F\+\_\+\+M\+A\+G\+I\+C\+\_\+\+N\+U\+M\+B\+ER}}
+\index{T\+I\+F\+F\+\_\+\+M\+A\+G\+I\+C\+\_\+\+N\+U\+M\+B\+ER@{T\+I\+F\+F\+\_\+\+M\+A\+G\+I\+C\+\_\+\+N\+U\+M\+B\+ER}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{T\+I\+F\+F\+\_\+\+M\+A\+G\+I\+C\+\_\+\+N\+U\+M\+B\+ER}{TIFF\_MAGIC\_NUMBER}}
+{\footnotesize\ttfamily \#define T\+I\+F\+F\+\_\+\+M\+A\+G\+I\+C\+\_\+\+N\+U\+M\+B\+ER~((0x4\+D $<$$<$ 8) $\vert$ 0x42)}
+
+
+
+\subsection{Typedef Documentation}
+\mbox{\Hypertarget{simple__bmp_8h_a25a27bd49b5894cbd22f82b82cad3e04}\label{simple__bmp_8h_a25a27bd49b5894cbd22f82b82cad3e04}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!sbmp\+\_\+image@{sbmp\+\_\+image}}
+\index{sbmp\+\_\+image@{sbmp\+\_\+image}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{sbmp\+\_\+image}{sbmp\_image}}
+{\footnotesize\ttfamily typedef struct \hyperlink{struct__sbmp__image}{\+\_\+sbmp\+\_\+image}  \hyperlink{simple__bmp_8h_a25a27bd49b5894cbd22f82b82cad3e04}{sbmp\+\_\+image}}
+
+
+
+\subsection{Enumeration Type Documentation}
+\mbox{\Hypertarget{simple__bmp_8h_ac95dedc44eee09ccd408bb929c77b5cf}\label{simple__bmp_8h_ac95dedc44eee09ccd408bb929c77b5cf}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!sbmp\+\_\+codes@{sbmp\+\_\+codes}}
+\index{sbmp\+\_\+codes@{sbmp\+\_\+codes}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{sbmp\+\_\+codes}{sbmp\_codes}}
+{\footnotesize\ttfamily enum \hyperlink{simple__bmp_8h_ac95dedc44eee09ccd408bb929c77b5cf}{sbmp\+\_\+codes}}
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{S\+B\+M\+P\+\_\+\+E\+R\+R\+O\+R\+\_\+\+P\+A\+R\+AM@{S\+B\+M\+P\+\_\+\+E\+R\+R\+O\+R\+\_\+\+P\+A\+R\+AM}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!S\+B\+M\+P\+\_\+\+E\+R\+R\+O\+R\+\_\+\+P\+A\+R\+AM@{S\+B\+M\+P\+\_\+\+E\+R\+R\+O\+R\+\_\+\+P\+A\+R\+AM}}}\mbox{\Hypertarget{simple__bmp_8h_ac95dedc44eee09ccd408bb929c77b5cfa2e2713669d691352dabf77ec2d7569f8}\label{simple__bmp_8h_ac95dedc44eee09ccd408bb929c77b5cfa2e2713669d691352dabf77ec2d7569f8}} 
+S\+B\+M\+P\+\_\+\+E\+R\+R\+O\+R\+\_\+\+P\+A\+R\+AM&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{S\+B\+M\+P\+\_\+\+E\+R\+R\+O\+R\+\_\+\+F\+I\+LE@{S\+B\+M\+P\+\_\+\+E\+R\+R\+O\+R\+\_\+\+F\+I\+LE}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!S\+B\+M\+P\+\_\+\+E\+R\+R\+O\+R\+\_\+\+F\+I\+LE@{S\+B\+M\+P\+\_\+\+E\+R\+R\+O\+R\+\_\+\+F\+I\+LE}}}\mbox{\Hypertarget{simple__bmp_8h_ac95dedc44eee09ccd408bb929c77b5cfa559e223fdd9cd087d0a0e75d82469aa6}\label{simple__bmp_8h_ac95dedc44eee09ccd408bb929c77b5cfa559e223fdd9cd087d0a0e75d82469aa6}} 
+S\+B\+M\+P\+\_\+\+E\+R\+R\+O\+R\+\_\+\+F\+I\+LE&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{S\+B\+M\+P\+\_\+\+OK@{S\+B\+M\+P\+\_\+\+OK}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!S\+B\+M\+P\+\_\+\+OK@{S\+B\+M\+P\+\_\+\+OK}}}\mbox{\Hypertarget{simple__bmp_8h_ac95dedc44eee09ccd408bb929c77b5cfacdfe32e459afc69d84692bbd69f7d95a}\label{simple__bmp_8h_ac95dedc44eee09ccd408bb929c77b5cfacdfe32e459afc69d84692bbd69f7d95a}} 
+S\+B\+M\+P\+\_\+\+OK&\\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{simple__bmp_8h_ac1c6dc675d49542b43f2c901f64bcbb6}\label{simple__bmp_8h_ac1c6dc675d49542b43f2c901f64bcbb6}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!\+\_\+\+\_\+attribute\+\_\+\+\_\+@{\+\_\+\+\_\+attribute\+\_\+\+\_\+}}
+\index{\+\_\+\+\_\+attribute\+\_\+\+\_\+@{\+\_\+\+\_\+attribute\+\_\+\+\_\+}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{\+\_\+\+\_\+attribute\+\_\+\+\_\+()}{\_\_attribute\_\_()}}
+{\footnotesize\ttfamily struct \hyperlink{struct__sbmp__raw__data}{\+\_\+sbmp\+\_\+raw\+\_\+data} \+\_\+\+\_\+attribute\+\_\+\+\_\+ (\begin{DoxyParamCaption}\item[{(\+\_\+\+\_\+packed\+\_\+\+\_\+)}]{ }\end{DoxyParamCaption})}
+
+
+
+Block 1\+: File Type Data, information about B\+MP File This block is a B\+MP Header labeled as B\+I\+T\+M\+A\+P\+F\+I\+L\+E\+H\+E\+A\+D\+ER (the name comes from c++ struct in Windows OS) 
+
+Pixel 24-\/bits description.
+
+\href{https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-BITMAPINFOHEADER}{\tt https\+://docs.\+microsoft.\+com/en-\/us/windows/win32/api/wingdi/ns-\/wingdi-\/\+B\+I\+T\+M\+A\+P\+I\+N\+F\+O\+H\+E\+A\+D\+ER} \mbox{\Hypertarget{simple__bmp_8h_af7dc140822d0eec1f53cb1e5ff036380}\label{simple__bmp_8h_af7dc140822d0eec1f53cb1e5ff036380}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!sbmp\+\_\+initialize\+\_\+bmp@{sbmp\+\_\+initialize\+\_\+bmp}}
+\index{sbmp\+\_\+initialize\+\_\+bmp@{sbmp\+\_\+initialize\+\_\+bmp}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{sbmp\+\_\+initialize\+\_\+bmp()}{sbmp\_initialize\_bmp()}}
+{\footnotesize\ttfamily enum \hyperlink{simple__bmp_8h_ac95dedc44eee09ccd408bb929c77b5cf}{sbmp\+\_\+codes} sbmp\+\_\+initialize\+\_\+bmp (\begin{DoxyParamCaption}\item[{\hyperlink{simple__bmp_8h_a25a27bd49b5894cbd22f82b82cad3e04}{sbmp\+\_\+image} $\ast$}]{image,  }\item[{uint32\+\_\+t}]{height,  }\item[{uint32\+\_\+t}]{width }\end{DoxyParamCaption})}
+
+Created by jmorales on 4/22/20. \mbox{\Hypertarget{simple__bmp_8h_adcd7207abee7c3b976382d3de27232e8}\label{simple__bmp_8h_adcd7207abee7c3b976382d3de27232e8}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!sbmp\+\_\+load\+\_\+bmp@{sbmp\+\_\+load\+\_\+bmp}}
+\index{sbmp\+\_\+load\+\_\+bmp@{sbmp\+\_\+load\+\_\+bmp}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{sbmp\+\_\+load\+\_\+bmp()}{sbmp\_load\_bmp()}}
+{\footnotesize\ttfamily enum \hyperlink{simple__bmp_8h_ac95dedc44eee09ccd408bb929c77b5cf}{sbmp\+\_\+codes} sbmp\+\_\+load\+\_\+bmp (\begin{DoxyParamCaption}\item[{const char $\ast$}]{filename,  }\item[{\hyperlink{simple__bmp_8h_a25a27bd49b5894cbd22f82b82cad3e04}{sbmp\+\_\+image} $\ast$}]{image }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{simple__bmp_8h_a1049cb65d9e6dcd887b4fb1d22446410}\label{simple__bmp_8h_a1049cb65d9e6dcd887b4fb1d22446410}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!sbmp\+\_\+save\+\_\+bmp@{sbmp\+\_\+save\+\_\+bmp}}
+\index{sbmp\+\_\+save\+\_\+bmp@{sbmp\+\_\+save\+\_\+bmp}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{sbmp\+\_\+save\+\_\+bmp()}{sbmp\_save\_bmp()}}
+{\footnotesize\ttfamily enum \hyperlink{simple__bmp_8h_ac95dedc44eee09ccd408bb929c77b5cf}{sbmp\+\_\+codes} sbmp\+\_\+save\+\_\+bmp (\begin{DoxyParamCaption}\item[{const char $\ast$}]{filename,  }\item[{const \hyperlink{simple__bmp_8h_a25a27bd49b5894cbd22f82b82cad3e04}{sbmp\+\_\+image} $\ast$}]{image }\end{DoxyParamCaption})}
+
+
+
+\subsection{Variable Documentation}
+\mbox{\Hypertarget{simple__bmp_8h_adf243ab54e91b0e1d112295908ab31e9}\label{simple__bmp_8h_adf243ab54e91b0e1d112295908ab31e9}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!bit\+\_\+per\+\_\+pixel@{bit\+\_\+per\+\_\+pixel}}
+\index{bit\+\_\+per\+\_\+pixel@{bit\+\_\+per\+\_\+pixel}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{bit\+\_\+per\+\_\+pixel}{bit\_per\_pixel}}
+{\footnotesize\ttfamily uint16\+\_\+t bit\+\_\+per\+\_\+pixel}
+
+
+
+The number of bits (memory) a pixel takes (in pixel data) to represent a color. 
+
+\mbox{\Hypertarget{simple__bmp_8h_a287b397e90d7b995c81ff54e741f96b2}\label{simple__bmp_8h_a287b397e90d7b995c81ff54e741f96b2}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!blue@{blue}}
+\index{blue@{blue}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{blue}{blue}}
+{\footnotesize\ttfamily uint8\+\_\+t blue}
+
+\mbox{\Hypertarget{simple__bmp_8h_aa379ffab5097352ba49ec9358c38cf4e}\label{simple__bmp_8h_aa379ffab5097352ba49ec9358c38cf4e}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!compression@{compression}}
+\index{compression@{compression}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{compression}{compression}}
+{\footnotesize\ttfamily uint32\+\_\+t compression}
+
+
+
+The value of compression to use. Should be \textquotesingle{}0\textquotesingle{} in decimal to represent no-\/compression (identified by \textquotesingle{}B\+I\+\_\+\+R\+GB\textquotesingle{}). 
+
+\mbox{\Hypertarget{simple__bmp_8h_a0e322da8c7e3d2d6292089c0432f885d}\label{simple__bmp_8h_a0e322da8c7e3d2d6292089c0432f885d}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!data\+\_\+offset@{data\+\_\+offset}}
+\index{data\+\_\+offset@{data\+\_\+offset}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{data\+\_\+offset}{data\_offset}}
+{\footnotesize\ttfamily uint32\+\_\+t data\+\_\+offset}
+
+the offset of actual pixel data in bytes. In nutshell\+:-\/ it is the number of bytes between start of the file (0) and the first byte of the pixel data. \mbox{\Hypertarget{simple__bmp_8h_acfc905fb689f590842c0152e3b8cd92e}\label{simple__bmp_8h_acfc905fb689f590842c0152e3b8cd92e}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!file\+\_\+size@{file\+\_\+size}}
+\index{file\+\_\+size@{file\+\_\+size}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{file\+\_\+size}{file\_size}}
+{\footnotesize\ttfamily uint32\+\_\+t file\+\_\+size}
+
+
+
+Entire file size in bytes. This value is basically the number of bytes in a B\+MP image file. 
+
+\mbox{\Hypertarget{simple__bmp_8h_ad5a78e4f6e8489d756f13809e3b5a7bf}\label{simple__bmp_8h_ad5a78e4f6e8489d756f13809e3b5a7bf}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!file\+\_\+type@{file\+\_\+type}}
+\index{file\+\_\+type@{file\+\_\+type}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{file\+\_\+type}{file\_type}}
+{\footnotesize\ttfamily uint16\+\_\+t file\+\_\+type}
+
+A 2 character string value in A\+S\+C\+II to specify a D\+IB file type. It must be \textquotesingle{}BM\textquotesingle{} or \textquotesingle{}0x42 0x4D\textquotesingle{} in hexadecimals for modern compatibility reasons. \mbox{\Hypertarget{simple__bmp_8h_a90d21fa503b626c00cdc8d94863d5877}\label{simple__bmp_8h_a90d21fa503b626c00cdc8d94863d5877}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!green@{green}}
+\index{green@{green}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{green}{green}}
+{\footnotesize\ttfamily uint8\+\_\+t green}
+
+\mbox{\Hypertarget{simple__bmp_8h_a841923a20e6dda97c59351c8e97c9be6}\label{simple__bmp_8h_a841923a20e6dda97c59351c8e97c9be6}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!header\+\_\+size@{header\+\_\+size}}
+\index{header\+\_\+size@{header\+\_\+size}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{header\+\_\+size}{header\_size}}
+{\footnotesize\ttfamily uint32\+\_\+t header\+\_\+size}
+
+The size of the header in bytes. It should be \textquotesingle{}40\textquotesingle{} in decimal to represent B\+I\+T\+M\+A\+P\+I\+N\+F\+O\+H\+E\+A\+D\+ER header type. \mbox{\Hypertarget{simple__bmp_8h_a6e5c29548d08063a544d79bfa6ac4a09}\label{simple__bmp_8h_a6e5c29548d08063a544d79bfa6ac4a09}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!image\+\_\+height@{image\+\_\+height}}
+\index{image\+\_\+height@{image\+\_\+height}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{image\+\_\+height}{image\_height}}
+{\footnotesize\ttfamily int32\+\_\+t image\+\_\+height}
+
+
+
+Height of the final image in pixels. 
+
+\mbox{\Hypertarget{simple__bmp_8h_a42539ea8650b094f66be7a689243c5ef}\label{simple__bmp_8h_a42539ea8650b094f66be7a689243c5ef}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!image\+\_\+size@{image\+\_\+size}}
+\index{image\+\_\+size@{image\+\_\+size}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{image\+\_\+size}{image\_size}}
+{\footnotesize\ttfamily uint32\+\_\+t image\+\_\+size}
+
+
+
+The final size of the compressed image. Should be \textquotesingle{}0\textquotesingle{} in decimal when no compression algorithm is used. 
+
+\mbox{\Hypertarget{simple__bmp_8h_ad2494d58b8995591a7a2172c723671d4}\label{simple__bmp_8h_ad2494d58b8995591a7a2172c723671d4}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!image\+\_\+width@{image\+\_\+width}}
+\index{image\+\_\+width@{image\+\_\+width}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{image\+\_\+width}{image\_width}}
+{\footnotesize\ttfamily int32\+\_\+t image\+\_\+width}
+
+
+
+The width of the final image in pixels. 
+
+\mbox{\Hypertarget{simple__bmp_8h_aff2221f0aaf63fbe5c12a9cba0e27cbc}\label{simple__bmp_8h_aff2221f0aaf63fbe5c12a9cba0e27cbc}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!important\+\_\+colors@{important\+\_\+colors}}
+\index{important\+\_\+colors@{important\+\_\+colors}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{important\+\_\+colors}{important\_colors}}
+{\footnotesize\ttfamily uint32\+\_\+t important\+\_\+colors}
+
+
+
+The number of important colors. Generally ignored by setting \textquotesingle{}0\textquotesingle{} decimal value. 
+
+\mbox{\Hypertarget{simple__bmp_8h_a5f6caf51b5ce3eb6fc340a667126406b}\label{simple__bmp_8h_a5f6caf51b5ce3eb6fc340a667126406b}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!planes@{planes}}
+\index{planes@{planes}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{planes}{planes}}
+{\footnotesize\ttfamily uint16\+\_\+t planes}
+
+
+
+The number of color planes of the target device. Should be \textquotesingle{}1\textquotesingle{} in decimal. 
+
+\mbox{\Hypertarget{simple__bmp_8h_ad47d918910aaa51c73160ac85999d09c}\label{simple__bmp_8h_ad47d918910aaa51c73160ac85999d09c}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!red@{red}}
+\index{red@{red}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{red}{red}}
+{\footnotesize\ttfamily uint8\+\_\+t red}
+
+\mbox{\Hypertarget{simple__bmp_8h_aa43c4c21b173ada1b6b7568956f0d650}\label{simple__bmp_8h_aa43c4c21b173ada1b6b7568956f0d650}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!reserved@{reserved}}
+\index{reserved@{reserved}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{reserved}{reserved}}
+{\footnotesize\ttfamily uint32\+\_\+t reserved}
+
+
+
+It should be initialized to \textquotesingle{}0\textquotesingle{} integer (unsigned) value. 
+
+\mbox{\Hypertarget{simple__bmp_8h_ac47e1e873452a259637f8c3546339105}\label{simple__bmp_8h_ac47e1e873452a259637f8c3546339105}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!total\+\_\+colors@{total\+\_\+colors}}
+\index{total\+\_\+colors@{total\+\_\+colors}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{total\+\_\+colors}{total\_colors}}
+{\footnotesize\ttfamily uint32\+\_\+t total\+\_\+colors}
+
+The number of colors in the color pallet (size of the color pallet or color table). If this is set to \textquotesingle{}0\textquotesingle{} in decimal \+:-\/ 2$^\wedge$\+Bits\+Per\+Pixel colors are used. \mbox{\Hypertarget{simple__bmp_8h_a58502cf50a0173a51dff0b74a650dbf4}\label{simple__bmp_8h_a58502cf50a0173a51dff0b74a650dbf4}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!xpix\+\_\+per\+\_\+meter@{xpix\+\_\+per\+\_\+meter}}
+\index{xpix\+\_\+per\+\_\+meter@{xpix\+\_\+per\+\_\+meter}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{xpix\+\_\+per\+\_\+meter}{xpix\_per\_meter}}
+{\footnotesize\ttfamily int32\+\_\+t xpix\+\_\+per\+\_\+meter}
+
+The horizontal resolution of the target device. This parameter will be adjusted by the image processing application but should be set to \textquotesingle{}0\textquotesingle{} to indicate no preference. \mbox{\Hypertarget{simple__bmp_8h_a89f4075b35033f13cc8a14885eb4c1ce}\label{simple__bmp_8h_a89f4075b35033f13cc8a14885eb4c1ce}} 
+\index{simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}!ypix\+\_\+per\+\_\+meter@{ypix\+\_\+per\+\_\+meter}}
+\index{ypix\+\_\+per\+\_\+meter@{ypix\+\_\+per\+\_\+meter}!simple\+\_\+bmp.\+h@{simple\+\_\+bmp.\+h}}
+\subsubsection{\texorpdfstring{ypix\+\_\+per\+\_\+meter}{ypix\_per\_meter}}
+{\footnotesize\ttfamily int32\+\_\+t ypix\+\_\+per\+\_\+meter}
+
+
+
+the verical resolution of the target device 
+
