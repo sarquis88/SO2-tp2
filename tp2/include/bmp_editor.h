@@ -13,8 +13,8 @@
 #define EXIT_MSG "exit\n"
 #define TEST_MSG "test\n"
 
-#define CONTRAST    ( (double) 1.3 )
-#define BRIGHTNESS  ( (uint8_t) 30 )
+#define DEFAULT_CONTRAST    ( (double) 1.3 )
+#define DEFAULT_BRIGHTNESS  ( (uint8_t) 30 )
 
 #define KERNEL_SIZE    ( (int8_t) 41 )
 
@@ -43,14 +43,14 @@ enum areas get_position_area( struct _sbmp_image *,
                               int16_t, int16_t,
                               int16_t, int16_t);
 enum input_codes radio_input();
-enum return_values edit_image();
+enum return_values edit_image(uint8_t, double);
 enum return_values open_image();
 void set_kernel(uint16_t**);
 void rutina_salida(int32_t);
 void view_images();
 void blure_pixel(struct _sbmp_image *, int16_t, int16_t);
 void increase_pixel_contrast_brightness(struct _sbmp_image *,
-                                        int16_t, int16_t);
+                                        int16_t, int16_t, uint8_t, double);
 void edit_limits(struct _sbmp_image *, int16_t, int16_t);
 void set_position(int16_t, int16_t, int16_t, int16_t);
 void print_kernel(uint16_t**);

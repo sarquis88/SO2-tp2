@@ -9,16 +9,31 @@ double time_s;
 /**
  *  Funcion principal
  */
-int32_t main( int32_t argc, char *argv[] )
+int32_t
+main( int32_t argc, char *argv[] )
   {
+    uint8_t brillo;
+    double contraste;
+    int8_t threads;
+
     // chequeo de argumentos
   	if ( argc < 2 )
       {
-    		printf("Uso: %s <cantidad_threads>\n", argv[0]);
+    		printf("Uso: %s <cantidad_threads> <brillo> <contraste>\n", argv[0]);
     		rutina_salida(EXIT_FAILURE);
   	  }
+    if ( argc < 4 )
+      {
+        brillo = DEFAULT_BRIGHTNESS;
+        contraste = DEFAULT_CONTRAST;
+      }
+    else
+      {
+        brillo = (uint8_t) strtol(argv[2], NULL, 10);
+        contraste = (double) strtod(argv[3], NULL);
+      }
 
-    int8_t threads = (int8_t) strtol(argv[1], NULL, 10);
+    threads = (int8_t) strtol(argv[1], NULL, 10);
     if(!threads)
       threads = 1;
     omp_set_num_threads( threads );
@@ -47,8 +62,8 @@ int32_t main( int32_t argc, char *argv[] )
     norm = get_norm(kernel);
     printf("Kernel seteado\n");
 
-    printf("Contraste: %.2f\n", CONTRAST);
-    printf("Brillo: %d\n", BRIGHTNESS);
+    printf("Contraste: %.2f\n", contraste);
+    printf("Brillo: %d\n", brillo);
     printf("Tamaño del kernel: %dx%d\n", KERNEL_SIZE, KERNEL_SIZE);
     printf("Cantidad de hilos: %d\n", threads );
 
@@ -81,9 +96,13 @@ int32_t main( int32_t argc, char *argv[] )
             }
           case INPUT_EXIT:
             {
-              for(int8_t i = 0; i < KERNEL_SIZE;i ++)
+              for(int8_t i = 0; i < KERNEL_SIZE; i++)
                 free(kernel[i]);
               free(kernel);
+
+              for(int32_t i = 0; i < bmp_original->info.image_height ; i++)
+                free(bmp_original->data[i]);
+              free(bmp_original->data);
               free(bmp_original);
 
               rutina_salida(SUCCES);
@@ -102,7 +121,7 @@ int32_t main( int32_t argc, char *argv[] )
           {
             printf("Radio: %ld pixeles\n", radio);
             printf("Editando imágen...\n");
-            if( edit_image() == FAILURE)
+            if( edit_image(brillo, contraste) == FAILURE)
               rutina_salida(EXIT_FAILURE);
             printf("Imágen editada\n");
             printf("Edición guardada en: %s\n", EDITED_IMAGE_PATH);
@@ -146,7 +165,8 @@ int32_t main( int32_t argc, char *argv[] )
  *  @return TEST para testear
  *  @return ERR si sucede error
  */
-enum input_codes radio_input()
+enum input_codes
+radio_input()
   {
     char input[INPUT_SIZE];
     while(1)
@@ -189,7 +209,8 @@ enum input_codes radio_input()
  *  Rutina de ejecución cuando se sale del programa sin errores
  *  @param sig parametro de salida
  */
-void rutina_salida(int32_t sig)
+void
+rutina_salida(int32_t sig)
   {
     if(sig)
       printf("\nSaliendo con errores...\n");
@@ -204,7 +225,8 @@ void rutina_salida(int32_t sig)
  * Si se realiza con exito, se imprimen detalles de la misma
  * @return SUCCES en exito, de lo contrario FAILURE
  */
-enum return_values open_image()
+enum return_values
+open_image()
   {
     bmp_original = malloc( sizeof(struct _sbmp_image) );
     if( sbmp_load_bmp(ORIGINAL_IMAGE_PATH, bmp_original) == SBMP_OK )
@@ -228,9 +250,12 @@ enum return_values open_image()
  * Edicion de imágen
  * Blurea los pixeles fuera del area central
  * Aumenta contraste y brillo de los pixeles centrales
+ * @param brillo cantidad de brillo a agregar
+ * @param contraste cantidad de contraste a agregar
  * @return FAILURE en caso de error, de lo contrario SUCCES
  */
-enum return_values edit_image()
+enum return_values
+edit_image(uint8_t brillo, double contraste)
   {
 
     struct _sbmp_image *bmp_edited = malloc(sizeof(struct _sbmp_image));
@@ -251,9 +276,15 @@ enum return_values edit_image()
     int16_t center_y = (int16_t) (bmp_edited->info.image_height / 2);
 
     int8_t area = 0;
-    double start = get_time();
 
-    #pragma omp parallel for schedule(static)
+    int32_t edited_pixels = 0;
+    int32_t total_pixels =  bmp_edited->info.image_height *
+                            bmp_edited->info.image_width;
+    uint32_t actual_progress;
+    uint32_t old_progress = 0;
+
+    double start = get_time();
+    #pragma omp parallel for schedule(auto) shared(edited_pixels, total_pixels, actual_progress, old_progress)
     for(int16_t i = 0; i < bmp_edited->info.image_height; i++)
       {
         for(int16_t j = 0; j < bmp_edited->info.image_width; j++)
@@ -268,7 +299,8 @@ enum return_values edit_image()
                   }
                 case IN_AREA:
                   {
-                    increase_pixel_contrast_brightness(bmp_edited, j, i);
+                    increase_pixel_contrast_brightness( bmp_edited, j, i,
+                                                        brillo, contraste);
                     break;
                   }
                 case LIM_AREA:
@@ -282,12 +314,30 @@ enum return_values edit_image()
                     rutina_salida(EXIT_FAILURE);
                   }
               }
+            #pragma omp critical
+              {
+                edited_pixels++;
+                actual_progress = ( (uint32_t) ((edited_pixels * 100)
+                                          / total_pixels ));
+                if( actual_progress % 20 == 0 &&
+                    actual_progress != old_progress)
+                  {
+                    old_progress = actual_progress;
+                    printf("%d%c completado\n", actual_progress, 37);
+                    fflush(stdout);
+                  }
+              }
           }
       }
     time_s = get_time() - start;
 
     sbmp_save_bmp(EDITED_IMAGE_PATH, bmp_edited);
+
+    for(int32_t i = 0; i < bmp_edited->info.image_height ; i++)
+      free(bmp_edited->data[i]);
+    free(bmp_edited->data);
     free(bmp_edited);
+
     return SUCCES;
   }
 
@@ -301,7 +351,8 @@ enum return_values edit_image()
  * @param center_y coordenada y de pixel
  * @return EX_AREA para area externa o IN_AREA para area interna
  */
-enum areas get_position_area( struct _sbmp_image * bmp_edited,
+enum areas
+get_position_area( struct _sbmp_image * bmp_edited,
                               int16_t pixel_x, int16_t pixel_y,
                               int16_t center_x, int16_t center_y)
  {
@@ -326,31 +377,35 @@ enum areas get_position_area( struct _sbmp_image * bmp_edited,
 
 /**
  * Aumento del contraste y del brillo del pixel ingresado
- * El contraste aumenta en proporcion CONTRAST
- * El brillo aumenta en valor BRIGHTNESS
+ * El contraste aumenta en proporcion contraste
+ * El brillo aumenta en valor brillo
  * @param bmp_edited imagen a editar
  * @param pixel_x coordenada x de pixel
  * @param pixel_y coordenada y de pixel
+ * @param brillo cantidad de brillo a agregar al pixel
+ * @param contraste cantidad de contraste a agrear al pixel
  */
-void increase_pixel_contrast_brightness(struct _sbmp_image *bmp_edited,
-                                        int16_t pixel_x, int16_t pixel_y)
+void
+increase_pixel_contrast_brightness(struct _sbmp_image *bmp_edited,
+                                        int16_t pixel_x, int16_t pixel_y,
+                                        uint8_t brillo, double contraste)
   {
     int16_t aux;
 
     aux = ( (int16_t) (bmp_original->data[pixel_y][pixel_x].blue
-            * CONTRAST + BRIGHTNESS) );
+            * contraste + brillo) );
     if(aux >= 255)
         aux = 255;
     bmp_edited->data[pixel_y][pixel_x].blue = (uint8_t) aux;
 
     aux = ( (int16_t) (bmp_original->data[pixel_y][pixel_x].green
-            * CONTRAST + BRIGHTNESS) );
+            * contraste + brillo) );
     if(aux >= 255)
         aux = 255;
     bmp_edited->data[pixel_y][pixel_x].green = (uint8_t) aux;
 
     aux = ( (int16_t) (bmp_original->data[pixel_y][pixel_x].red
-            * CONTRAST + BRIGHTNESS) );
+            * contraste + brillo) );
     if(aux >= 255)
         aux = 255;
     bmp_edited->data[pixel_y][pixel_x].red = (uint8_t) aux;
@@ -363,7 +418,8 @@ void increase_pixel_contrast_brightness(struct _sbmp_image *bmp_edited,
  * @param pixel_x coordenada x de pixel
  * @param pixel_y coordenada y de pixel
  */
-void edit_limits(struct _sbmp_image * bmp_edited, int16_t pixel_x,
+void
+edit_limits(struct _sbmp_image * bmp_edited, int16_t pixel_x,
                                                   int16_t pixel_y)
   {
     bmp_edited->data[pixel_y][pixel_x].blue =
@@ -380,7 +436,8 @@ void edit_limits(struct _sbmp_image * bmp_edited, int16_t pixel_x,
  * @param pixel_x coordenada x de pixel
  * @param pixel_y coordenada y de pixel
  */
-void blure_pixel( struct _sbmp_image *bmp_edited, int16_t pixel_x,
+void
+blure_pixel( struct _sbmp_image *bmp_edited, int16_t pixel_x,
                                                   int16_t pixel_y)
   {
     uint32_t acum_blue = 0;
@@ -414,7 +471,8 @@ void blure_pixel( struct _sbmp_image *bmp_edited, int16_t pixel_x,
  * Obtengo tiempo "actual"
  * @return tiempo
  */
-double get_time()
+double
+get_time()
   {
     return  omp_get_wtime();
   }
@@ -424,7 +482,8 @@ double get_time()
  *  @param kernel kernel usado
  *  @return valor de la normalizacion
  */
-uint16_t get_norm(uint16_t ** kernel)
+uint16_t
+get_norm(uint16_t ** kernel)
   {
     uint16_t norm_aux = 0;
     for (int16_t i = 0; i < KERNEL_SIZE; i++)
@@ -441,8 +500,9 @@ uint16_t get_norm(uint16_t ** kernel)
  *  Imprime el kernel. Usado para debug
  *  @param kernel kernel a imprimir
  */
-/*
-void print_kernel(uint16_t ** kernel)
+ /*
+void
+print_kernel(uint16_t ** kernel)
   {
     for (int16_t i = 0; i < KERNEL_SIZE; i++)
       {
@@ -454,12 +514,12 @@ void print_kernel(uint16_t ** kernel)
       }
   }
 */
-
   /**
    * Inicializacion de kernel
    * @param kernel matriz kernel a setear
    */
-void set_kernel(uint16_t **kernel)
+void
+set_kernel(uint16_t **kernel)
   {
     uint16_t st_val = 1;
     for (int8_t j = 0; j < KERNEL_SIZE; j++)

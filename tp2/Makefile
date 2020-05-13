@@ -5,4 +5,4 @@ make:
 docs:
 	doxygen Doxyfile
 clean:
-	rm -r bin/*
+	rm -r bin/* html/ latex/
