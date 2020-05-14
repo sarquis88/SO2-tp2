@@ -314,6 +314,7 @@ edit_image(uint8_t brillo, double contraste)
                     rutina_salida(EXIT_FAILURE);
                   }
               }
+            // mostrar progeso - se puede sacar para mejor perfomance
             #pragma omp critical
               {
                 edited_pixels++;
@@ -357,9 +358,6 @@ get_position_area( struct _sbmp_image * bmp_edited,
                               int16_t center_x, int16_t center_y)
  {
    double distance;
-   // distance = pow(pixel_x - center_x, 2)
-   //            + pow(pixel_y - center_y, 2);
-   // distance = sqrt(distance);
 
    distance = (pixel_x - center_x) * (pixel_x - center_x) +
               (pixel_y - center_y) * (pixel_y - center_y);
