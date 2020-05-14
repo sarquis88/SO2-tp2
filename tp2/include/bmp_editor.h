@@ -24,7 +24,18 @@
 enum areas {
   EX_AREA = 0,
   IN_AREA = 1,
-  LIM_AREA = 2
+
+  UP_LIM_AREA = 2,
+  DOWN_LIM_AREA = 3,
+  RIGHT_LIM_AREA = 4,
+  LEFT_LIM_AREA = 5,
+
+  UP_RIGHT_CORNER_AREA = 6,
+  UP_LEFT_CORNER_AREA = 7,
+  DOWN_RIGHT_CORNER_AREA = 8,
+  DOWN_LEFT_CORNER_AREA = 9,
+
+  ERR_AREA = 10
 };
 
 enum return_values {
@@ -48,7 +59,7 @@ enum return_values open_image();
 void set_kernel(uint16_t**);
 void rutina_salida(int32_t);
 void view_images();
-void blure_pixel(struct _sbmp_image *, int16_t, int16_t);
+void blure_pixel(struct _sbmp_image *, int16_t, int16_t, int8_t);
 void increase_pixel_contrast_brightness(struct _sbmp_image *,
                                         int16_t, int16_t, uint8_t, double);
 void edit_limits(struct _sbmp_image *, int16_t, int16_t);

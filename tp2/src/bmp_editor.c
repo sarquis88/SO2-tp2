@@ -284,7 +284,7 @@ edit_image(uint8_t brillo, double contraste)
     uint32_t old_progress = 0;
 
     double start = get_time();
-    #pragma omp parallel for schedule(auto) shared(edited_pixels, total_pixels, actual_progress, old_progress)
+    #pragma omp parallel for schedule(auto) private(area) shared(edited_pixels, total_pixels, actual_progress, old_progress)
     for(int16_t i = 0; i < bmp_edited->info.image_height; i++)
       {
         for(int16_t j = 0; j < bmp_edited->info.image_width; j++)
@@ -292,26 +292,16 @@ edit_image(uint8_t brillo, double contraste)
             area = get_position_area( bmp_edited, j, i, center_x, center_y);
             switch (area)
               {
-                case EX_AREA:
-                  {
-                    blure_pixel(bmp_edited, j, i);
-                    break;
-                  }
                 case IN_AREA:
                   {
                     increase_pixel_contrast_brightness( bmp_edited, j, i,
                                                         brillo, contraste);
                     break;
                   }
-                case LIM_AREA:
-                  {
-                    edit_limits(bmp_edited, j, i);
-                    break;
-                  }
                 default:
                   {
-                    printf("ERROR ANALIZANDO AREA DE PIXEL\n");
-                    rutina_salida(EXIT_FAILURE);
+                    blure_pixel(bmp_edited, j, i, area);
+                    break;
                   }
               }
             // mostrar progeso - se puede sacar para mejor perfomance
@@ -361,14 +351,34 @@ get_position_area( struct _sbmp_image * bmp_edited,
 
    distance = (pixel_x - center_x) * (pixel_x - center_x) +
               (pixel_y - center_y) * (pixel_y - center_y);
+
    if( distance <= radio * radio)
     return IN_AREA;
 
-   if( pixel_x < off || pixel_y < off )
-    return LIM_AREA;
-   if(            pixel_x + off >= bmp_edited->info.image_width
-              ||  pixel_y + off >= bmp_edited->info.image_height)
-    return LIM_AREA;
+   if( pixel_x < off && pixel_y < off)
+    return UP_LEFT_CORNER_AREA;
+
+   if( pixel_x < off && pixel_y + off >= bmp_edited->info.image_height )
+    return DOWN_LEFT_CORNER_AREA;
+
+   if( pixel_y < off && pixel_x + off >= bmp_edited->info.image_width )
+    return UP_RIGHT_CORNER_AREA;
+
+   if(  pixel_y + off >= bmp_edited->info.image_height &&
+        pixel_x + off >= bmp_edited->info.image_width)
+    return DOWN_RIGHT_CORNER_AREA;
+
+   if( pixel_x < off)
+    return LEFT_LIM_AREA;
+
+   if( pixel_y < off )
+    return UP_LIM_AREA;
+
+   if( pixel_x + off >= bmp_edited->info.image_width)
+    return RIGHT_LIM_AREA;
+
+   if( pixel_y + off >= bmp_edited->info.image_height)
+    return DOWN_LIM_AREA;
 
    return EX_AREA;
  }
@@ -435,25 +445,65 @@ edit_limits(struct _sbmp_image * bmp_edited, int16_t pixel_x,
  * @param pixel_y coordenada y de pixel
  */
 void
-blure_pixel( struct _sbmp_image *bmp_edited, int16_t pixel_x,
-                                                  int16_t pixel_y)
+blure_pixel(  struct _sbmp_image *bmp_edited, int16_t pixel_x,
+              int16_t pixel_y, int8_t area)
   {
     uint32_t acum_blue = 0;
     uint32_t acum_green = 0;
     uint32_t acum_red = 0;
 
-    for(int8_t i = (int8_t) -off; i <= off; i++)
+    int8_t i = (int8_t) -off;
+    int8_t j = (int8_t) -off;
+    int8_t i_end = (int8_t) off;
+    int8_t j_end = (int8_t) off;
+
+    switch (area) {
+      case UP_LIM_AREA:
+        i = ( (int8_t) (- pixel_y) );
+        break;
+      case DOWN_LIM_AREA:
+        i_end = ( (int8_t) (bmp_edited->info.image_height - pixel_y) );
+        break;
+      case LEFT_LIM_AREA:
+        j = ( (int8_t) (- pixel_x) );
+        break;
+      case RIGHT_LIM_AREA:
+        j_end = ( (int8_t) (bmp_edited->info.image_width - pixel_x) );
+        break;
+      case UP_RIGHT_CORNER_AREA:
+        i = ( (int8_t) (- pixel_y) );
+        j_end = ( (int8_t) (bmp_edited->info.image_width - pixel_x) );
+        break;
+      case UP_LEFT_CORNER_AREA:
+        i = ( (int8_t) (- pixel_y) );
+        j = ( (int8_t) (- pixel_x) );
+        break;
+      case DOWN_RIGHT_CORNER_AREA:
+        i_end = ( (int8_t) (bmp_edited->info.image_height - pixel_y ) );
+        j_end = ( (int8_t) (bmp_edited->info.image_width - pixel_x) );
+        break;
+      case DOWN_LEFT_CORNER_AREA:
+        i_end = ( (int8_t) (bmp_edited->info.image_height - pixel_y) );
+        j = ( (int8_t) (- pixel_x) );
+        break;
+      case ERR_AREA:
+        printf("ERROR ANALIZANDO AREAS\n");
+        rutina_salida(EXIT_FAILURE);
+        break;
+    }
+
+    for(int8_t ii = i; ii < i_end; ii++)
       {
-        for(int8_t j = (int8_t) -off; j <= off; j++)
+        for(int8_t jj = j; jj <= j_end; jj++)
           {
-            acum_blue   += (  (uint32_t) kernel[i + off][j + off] *
-                            bmp_original->data[i + pixel_y][j + pixel_x].blue);
+            acum_blue   += (  (uint32_t) kernel[ii + off][jj + off] *
+                            bmp_original->data[ii + pixel_y][jj + pixel_x].blue);
 
-            acum_green  += (  (uint32_t) kernel[i + off][j + off] *
-                            bmp_original->data[i + pixel_y][j + pixel_x].green);
+            acum_green  += (  (uint32_t) kernel[ii + off][jj + off] *
+                            bmp_original->data[ii + pixel_y][jj + pixel_x].green);
 
-            acum_red    += (   (uint32_t) kernel[i + off][j + off] *
-                            bmp_original->data[i + pixel_y][j + pixel_x].red);
+            acum_red    += (   (uint32_t) kernel[ii + off][jj + off] *
+                            bmp_original->data[ii + pixel_y][jj + pixel_x].red);
           }
       }
 
