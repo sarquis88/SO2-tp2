@@ -277,14 +277,8 @@ edit_image(uint8_t brillo, double contraste)
 
     int8_t area = 0;
 
-    int32_t edited_pixels = 0;
-    int32_t total_pixels =  bmp_edited->info.image_height *
-                            bmp_edited->info.image_width;
-    uint32_t actual_progress;
-    uint32_t old_progress = 0;
-
     double start = get_time();
-    #pragma omp parallel for schedule(auto) shared(edited_pixels, total_pixels, actual_progress, old_progress)
+    #pragma omp parallel for schedule(static)
     for(int16_t i = 0; i < bmp_edited->info.image_height; i++)
       {
         for(int16_t j = 0; j < bmp_edited->info.image_width; j++)
@@ -312,20 +306,6 @@ edit_image(uint8_t brillo, double contraste)
                   {
                     printf("ERROR ANALIZANDO AREA DE PIXEL\n");
                     rutina_salida(EXIT_FAILURE);
-                  }
-              }
-            // mostrar progeso - se puede sacar para mejor perfomance
-            #pragma omp critical
-              {
-                edited_pixels++;
-                actual_progress = ( (uint32_t) ((edited_pixels * 100)
-                                          / total_pixels ));
-                if( actual_progress % 20 == 0 &&
-                    actual_progress != old_progress)
-                  {
-                    old_progress = actual_progress;
-                    printf("%d%c completado\n", actual_progress, 37);
-                    fflush(stdout);
                   }
               }
           }
