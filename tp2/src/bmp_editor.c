@@ -419,25 +419,6 @@ increase_pixel_contrast_brightness(struct _sbmp_image *bmp_edited,
     bmp_edited->data[pixel_y][pixel_x].red = (uint8_t) aux;
   }
 
-/*
- * Edicion de limites de imágen en los cuales no se hace blureado ni aumento
- * de contraste o brillo. Estos pixeles se dejan iguales a los originales
- * @param bmp_edited imagen a editar
- * @param pixel_x coordenada x de pixel
- * @param pixel_y coordenada y de pixel
- */
-void
-edit_limits(struct _sbmp_image * bmp_edited, int16_t pixel_x,
-                                                  int16_t pixel_y)
-  {
-    bmp_edited->data[pixel_y][pixel_x].blue =
-      bmp_original->data[pixel_y][pixel_x].blue;
-    bmp_edited->data[pixel_y][pixel_x].green =
-      bmp_original->data[pixel_y][pixel_x].green;
-    bmp_edited->data[pixel_y][pixel_x].red =
-      bmp_original->data[pixel_y][pixel_x].red;
-  }
-
 /**
  * Blurea el pixel ingresado realizando convolusion
  * @param bmp_edited imagen a editar
@@ -544,24 +525,6 @@ get_norm(uint16_t ** kernel)
     return norm_aux;
   }
 
-/**
- *  Imprime el kernel. Usado para debug
- *  @param kernel kernel a imprimir
- */
- /*
-void
-print_kernel(uint16_t ** kernel)
-  {
-    for (int16_t i = 0; i < KERNEL_SIZE; i++)
-      {
-        for (int16_t j = 0; j < KERNEL_SIZE; j++)
-          {
-            printf("%d ", kernel[i][j]);
-          }
-        printf("\n");
-      }
-  }
-*/
   /**
    * Inicializacion de kernel
    * @param kernel matriz kernel a setear
