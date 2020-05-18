@@ -474,24 +474,6 @@ get_norm(uint16_t ** kernel)
     return norm_aux;
   }
 
-/**
- *  Imprime el kernel. Usado para debug
- *  @param kernel kernel a imprimir
- */
- /*
-void
-print_kernel(uint16_t ** kernel)
-  {
-    for (int16_t i = 0; i < KERNEL_SIZE; i++)
-      {
-        for (int16_t j = 0; j < KERNEL_SIZE; j++)
-          {
-            printf("%d ", kernel[i][j]);
-          }
-        printf("\n");
-      }
-  }
-*/
   /**
    * Inicializacion de kernel
    * @param kernel matriz kernel a setear
