@@ -473,6 +473,7 @@ blure_pixel(  struct _sbmp_image *bmp_edited, int16_t pixel_x,
         break;
     }
 
+    uint32_t norm_local = 0;
     for(int8_t ii = i; ii < i_end; ii++)
       {
         for(int8_t jj = j; jj <= j_end; jj++)
@@ -485,15 +486,20 @@ blure_pixel(  struct _sbmp_image *bmp_edited, int16_t pixel_x,
 
             acum_red    += (   (uint32_t) kernel[ii + off][jj + off] *
                             bmp_original->data[ii + pixel_y][jj + pixel_x].red);
+
+            norm_local += kernel[ii + off][jj + off];
           }
       }
 
+      if( area == EX_AREA )
+        norm_local = norm;
+
       bmp_edited->data[pixel_y][pixel_x].blue = ( (uint8_t)
-                  (acum_blue / norm) );
+                  (acum_blue / norm_local) );
       bmp_edited->data[pixel_y][pixel_x].green = ( (uint8_t)
-                  (acum_green / norm) );
+                  (acum_green / norm_local) );
       bmp_edited->data[pixel_y][pixel_x].red = ( (uint8_t)
-                  (acum_red / norm) );
+                  (acum_red / norm_local) );
   }
 
 /**
